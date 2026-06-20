@@ -1,0 +1,38 @@
+---
+description: Postgres schema, migrations, and data access rules
+globs: "{db,lib}/**/*.{ts,sql}"
+alwaysApply: false
+---
+
+# Postgres Rules
+
+## Hybrid data model
+
+- Firebase Auth → `users.firebase_uid`
+- Postgres owns: `users`, `user_preferences`, `places` (snapshots), `favorites`, `groups`, `group_members`, `group_favorites`, `group_invites`
+
+## Place storage
+
+Store only interacted OSM places (favorited or group-saved). Do not mirror full Overpass dataset.
+
+```sql
+-- place id format: node/12345, way/67890
+primary key (user_id, place_id) on favorites
+primary key (group_id, user_id) on group_members
+```
+
+## Migrations
+
+- Versioned SQL in `db/migrations/`
+- Phase 1 tables first: users, places, favorites, groups, group_members
+- Phase 2+: group_favorites, group_invites, reviews, activities
+
+## Queries
+
+- Filter by authenticated `user_id` or verified group membership
+- Add indexes before shipping list endpoints
+- Use transactions for group creation (group + owner membership)
+
+## Env
+
+- `DATABASE_URL` is server-only — never expose in client bundle

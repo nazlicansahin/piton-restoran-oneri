@@ -1,0 +1,42 @@
+---
+description: REST API route handler conventions
+globs: app/api/**/*.ts
+alwaysApply: false
+---
+
+# API Route Rules
+
+## Handler shape
+
+1. Parse and validate input (Zod)
+2. Verify Firebase ID token from `Authorization` header
+3. Map `firebase_uid` → internal `users.id`
+4. Call service/repository
+5. Return typed JSON or standard error envelope
+
+## Error envelope
+
+```json
+{ "code": "forbidden", "message": "...", "details": {}, "requestId": "..." }
+```
+
+## AuthZ
+
+- Never accept `userId` from client body/query
+- Group writes: check `group_members.role` (`owner`/`admin` for invites and group favorites)
+- Members can read group resources they belong to
+
+## Idempotency
+
+- `PUT /api/favorites/:placeId` for upsert
+- `DELETE` for removals
+- Wrap multi-write ops (create group + owner membership) in transactions
+
+## External APIs
+
+- Proxy Overpass/Nominatim through server (CORS + normalization)
+- Set timeouts; cache by lat/lng/radius bucket when reasonable
+
+## Naming
+
+- DTOs end with `Dto`; DB row types end with `Row`

@@ -1,0 +1,59 @@
+---
+description: Document every new function in docs/functions with name, purpose, and how it works
+globs: "{app,components,hooks,lib,store}/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Function Documentation Rule
+
+When you **create or significantly change** a function, add or update its entry in `docs/functions/`.
+
+## Required doc file
+
+- One markdown file per **module/domain**, not per function:
+  - `docs/functions/recommend.md`
+  - `docs/functions/api-favorites.md`
+  - `docs/functions/auth.md`
+- If no file exists for the domain, create it.
+- See [docs/FUNCTION_DOCUMENTATION.md](../FUNCTION_DOCUMENTATION.md) for the full duty and template.
+
+## What to document
+
+For each function, include:
+
+1. **Name** — exact function name and file path
+2. **Purpose** — what problem it solves (one sentence)
+3. **How it works** — inputs, outputs, main steps, side effects
+4. **Dependencies** — what it calls or relies on (DB, APIs, other functions)
+5. **Example** — minimal usage snippet when non-obvious
+
+## Template (copy per function)
+
+```markdown
+### `functionName`
+
+- **File:** `lib/recommend.ts`
+- **Purpose:** Ranks nearby places by user preferences and favorite history.
+- **How it works:**
+  1. Filters places outside `maxDistanceKm`
+  2. Computes weighted scores (distance, cuisine, price, history)
+  3. Sorts descending; breaks ties by distance then name
+- **Inputs:** `RecommendationInput`
+- **Returns:** `RecommendationItem[]`
+- **Side effects:** None (pure function)
+- **Example:**
+  ```ts
+  const ranked = rankPlaces({ places, preferences, favoriteSignals });
+  ```
+```
+
+## When to update
+
+- New exported function → add section
+- Signature or behavior change → update section
+- Function removed → remove section in same commit/PR
+
+## Do not document
+
+- Trivial one-liners with obvious names (e.g. `cn()` class merge)
+- Generated code, test mocks, or config-only files

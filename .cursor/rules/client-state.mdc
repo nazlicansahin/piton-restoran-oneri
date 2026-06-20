@@ -1,0 +1,38 @@
+---
+description: Client state, hooks, and optimistic update patterns
+globs: "{store,hooks,components}/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Client State Rules
+
+## Split state by purpose
+
+| Kind | Where | Examples |
+|------|-------|----------|
+| Server state | API + Zustand cache | favorites, groups, preferences |
+| UI state | Zustand or local | selected marker, panels, loading |
+| Form state | component-local | until submit |
+
+## Optimistic updates
+
+Use only for favorite toggle and group favorite add/remove:
+
+```typescript
+// 1. snapshot previous
+// 2. apply optimistic change to store
+// 3. await API
+// 4. on error: restore snapshot + toast
+```
+
+## Hooks
+
+- `useUserData` — fetch/mutate favorites and groups via API
+- Auth token from `AuthProvider`; attach to every protected request
+- Recompute recommendations when places, preferences, or favorites change (memoize input hash)
+
+## Components
+
+- `"use client"` only when needed (hooks, map, interactivity)
+- Map markers: batch updates; avoid re-rendering all markers on minor state changes
+- Show score breakdown / reasons on recommendation cards

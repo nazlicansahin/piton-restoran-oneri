@@ -1,0 +1,77 @@
+---
+description: Git commit message conventions and safety rules
+alwaysApply: true
+---
+
+# Git Commit Rules
+
+## When to commit
+
+- Commit **only when the user explicitly asks**
+- Never commit secrets (`.env`, `serviceAccountKey.json`, API keys)
+- Never amend, force-push, or skip hooks unless the user explicitly requests it
+
+## Message format
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) with optional scope:
+
+```
+<type>(<scope>): <short summary>
+
+[optional body — explain why, not just what]
+```
+
+### Types
+
+| Type | Use for |
+|------|---------|
+| `feat` | New feature or user-facing capability |
+| `fix` | Bug fix |
+| `refactor` | Code change without behavior change |
+| `docs` | README, ADR, comments only |
+| `test` | Tests only |
+| `chore` | Tooling, deps, config, CI |
+| `style` | Formatting, no logic change |
+
+### Scopes (examples)
+
+`api`, `auth`, `db`, `map`, `favorites`, `groups`, `recommend`, `ui`, `docker`, `ci`
+
+### Examples
+
+```
+feat(favorites): add PUT endpoint for upserting place snapshots
+
+fix(api): verify Firebase token before mapping firebase_uid to user id
+
+docs: add setup steps for Firebase env vars and DATABASE_URL
+
+chore(docker): add multi-stage Dockerfile with standalone output
+```
+
+## Message quality
+
+- Summary: imperative mood, ≤72 chars, no trailing period
+- Focus on **why** in the body when the change is non-obvious
+- One logical change per commit — avoid mixing unrelated areas
+- Match existing repo style if prior commits use a different pattern
+
+## Commit command
+
+Always pass the message via HEREDOC:
+
+```bash
+git commit -m "$(cat <<'EOF'
+feat(scope): summary here.
+
+Optional body explaining why.
+EOF
+)"
+```
+
+## Pre-commit checklist
+
+1. `git status` — review staged vs unstaged
+2. `git diff --staged` — confirm only intended files
+3. No `.env` or credential files in the diff
+4. Run relevant lint/test if the change touches app code

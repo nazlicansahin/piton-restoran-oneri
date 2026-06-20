@@ -1,0 +1,42 @@
+---
+description: Core architecture, stack, and scope for piton-restoran-oneri
+alwaysApply: true
+---
+
+# Project Core
+
+## Product
+
+Geolocation map app listing nearby restaurants/cafes, user preferences, ranked recommendations ("Senin İçin En Uygun Mekanlar"), personal favorites, and groups.
+
+## Stack (do not deviate without reason)
+
+- Next.js App Router + TypeScript
+- Firebase Auth (identity) + Postgres (app data)
+- Zustand for UI/optimistic cache only
+- Leaflet, Overpass API, REST route handlers
+- No GraphQL. No dockerized Firebase.
+
+## Layering
+
+```
+components/app → hooks/store → lib API client → app/api → services → DB
+```
+
+- UI: no SQL, no business rules beyond formatting
+- Domain (`lib/recommend.ts`, validators): pure, framework-free
+- Infrastructure (`app/api`, DB): auth, persistence, external APIs
+
+## Recommendation scoring
+
+```
+score = 0.35*distance + 0.35*cuisine + 0.15*price + 0.15*history
+```
+
+Must be deterministic, explainable, and documented in README.
+
+## Change discipline
+
+- Minimal diffs; match existing conventions
+- No over-engineering or unrelated refactors
+- Never commit secrets (`.env`, service account keys)
