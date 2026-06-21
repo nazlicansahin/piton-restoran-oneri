@@ -165,7 +165,7 @@ npm test
 
 1. Repoyu Vercel'e import edin (framework: Next.js)
 2. `.env.example` içindeki tüm değişkenleri Production + Preview ortamlarına ekleyin
-3. **AI sohbet** için Vercel projesinde [AI Gateway](https://vercel.com/docs/ai-gateway) etkinleştirin veya `AI_GATEWAY_API_KEY` ekleyin
+3. **AI sohbet** için Vercel projesinde [AI Gateway](https://vercel.com/docs/ai-gateway) etkinleştirin, `AI_GATEWAY_API_KEY` ekleyin ve takım hesabına kredi kartı bağlayın (ücretsiz krediler için gerekli)
 4. Deploy sonrası Vercel domain'ini Firebase **Authorized domains** listesine ekleyin (Google girişi için)
 
 ## Yol haritası

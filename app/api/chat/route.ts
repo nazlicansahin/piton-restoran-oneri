@@ -6,6 +6,7 @@ import {
 } from "ai";
 import { buildChatSystemPrompt } from "@/lib/chat/prompt";
 import { CHAT_MODEL, isChatConfigured } from "@/lib/chat/config";
+import { formatChatStreamError } from "@/lib/chat/errors";
 import { chatRequestSchema } from "@/lib/chat/validation";
 import { ApiException, makeRequestId, toErrorResponse } from "@/lib/http";
 
@@ -47,6 +48,7 @@ export async function POST(req: Request) {
 
     return result.toUIMessageStreamResponse({
       originalMessages: uiMessages,
+      onError: formatChatStreamError,
     });
   } catch (err) {
     return toErrorResponse(err, requestId);

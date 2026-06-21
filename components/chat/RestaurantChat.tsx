@@ -111,9 +111,7 @@ export function RestaurantChat({ context, onSelectPlace }: RestaurantChatProps) 
             })}
             {error && (
               <p className="text-xs text-destructive">
-                {error.message.includes("503") || error.message.includes("ai_not")
-                  ? t("chat.notConfigured")
-                  : t("chat.error")}
+                {error.message || t("chat.error")}
               </p>
             )}
           </div>
