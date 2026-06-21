@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useT } from "@/components/providers/I18nProvider";
 import { useUserData } from "@/hooks/useUserData";
 import { api, ApiClientError } from "@/lib/api-client";
 import { Card } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import type { GroupDetailsDto, GroupFavoriteDto } from "@/lib/types";
 
 function GroupDetailContent({ groupId }: { groupId: string }) {
+  const t = useT();
   const { getToken } = useAuth();
   const { favorites } = useUserData();
   const [group, setGroup] = useState<GroupDetailsDto | null>(null);
@@ -36,12 +38,12 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
       setGroupFavorites(favs.items);
     } catch (err) {
       setError(
-        err instanceof ApiClientError ? err.message : "Grup yüklenemedi",
+        err instanceof ApiClientError ? err.message : t("group.loadError"),
       );
     } finally {
       setLoading(false);
     }
-  }, [getToken, groupId]);
+  }, [getToken, groupId, t]);
 
   useEffect(() => {
     load();
@@ -54,10 +56,10 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
     try {
       await api.createInvite(token, groupId, inviteEmail.trim());
       setInviteEmail("");
-      toast.success("Davet oluşturuldu");
+      toast.success(t("group.inviteCreated"));
     } catch (err) {
       toast.error(
-        err instanceof ApiClientError ? err.message : "Davet gönderilemedi",
+        err instanceof ApiClientError ? err.message : t("group.inviteError"),
       );
     }
   };
@@ -77,10 +79,10 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
         lng: fav.lng,
       });
       setGroupFavorites((prev) => [res.item, ...prev]);
-      toast.success("Mekan gruba eklendi");
+      toast.success(t("group.added"));
     } catch (err) {
       toast.error(
-        err instanceof ApiClientError ? err.message : "Eklenemedi",
+        err instanceof ApiClientError ? err.message : t("group.addError"),
       );
     }
   };
@@ -92,15 +94,21 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
       await api.removeGroupFavorite(token, groupId, placeId);
       setGroupFavorites((prev) => prev.filter((f) => f.placeId !== placeId));
     } catch {
-      toast.error("Kaldırılamadı");
+      toast.error(t("group.removeError"));
     }
   };
 
   if (loading) {
-    return <p className="p-6 text-sm text-muted-foreground">Yükleniyor...</p>;
+    return (
+      <p className="p-6 text-sm text-muted-foreground">{t("groups.loading")}</p>
+    );
   }
   if (error || !group) {
-    return <p className="p-6 text-sm text-destructive">{error ?? "Grup bulunamadı"}</p>;
+    return (
+      <p className="p-6 text-sm text-destructive">
+        {error ?? t("group.notFound")}
+      </p>
+    );
   }
 
   const groupPlaceIds = new Set(groupFavorites.map((f) => f.placeId));
@@ -117,7 +125,9 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
         <section>
-          <h2 className="mb-2 text-sm font-semibold">Üyeler ({group.members.length})</h2>
+          <h2 className="mb-2 text-sm font-semibold">
+            {t("group.members", { count: group.members.length })}
+          </h2>
           <ul className="flex flex-col gap-1.5">
             {group.members.map((m) => (
               <li
@@ -125,7 +135,7 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
                 className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
               >
                 <span className="truncate">
-                  {m.displayName ?? m.email ?? "Üye"}
+                  {m.displayName ?? m.email ?? t("group.member")}
                 </span>
                 <span className="text-xs text-muted-foreground">{m.role}</span>
               </li>
@@ -136,13 +146,13 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
             <form onSubmit={onInvite} className="mt-3 flex gap-2">
               <Input
                 type="email"
-                placeholder="davet@eposta.com"
+                placeholder={t("group.invitePlaceholder")}
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 required
               />
               <Button type="submit" size="sm">
-                Davet et
+                {t("group.invite")}
               </Button>
             </form>
           )}
@@ -150,7 +160,7 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
 
         <section>
           <h2 className="mb-2 text-sm font-semibold">
-            Grup Favorileri ({groupFavorites.length})
+            {t("group.favorites", { count: groupFavorites.length })}
           </h2>
           <ul className="flex flex-col gap-1.5">
             {groupFavorites.map((f) => (
@@ -160,10 +170,10 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">
-                    {f.name ?? "İsimsiz mekan"}
+                    {f.name ?? t("place.unnamed")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {f.cuisine ?? "Mutfak belirtilmemiş"}
+                    {f.cuisine ?? t("place.noCuisine")}
                     {f.addedByName ? ` · ${f.addedByName}` : ""}
                   </p>
                 </div>
@@ -172,7 +182,7 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
                     type="button"
                     onClick={() => removeFromGroup(f.placeId)}
                     className="rounded p-1 text-muted-foreground hover:bg-muted"
-                    aria-label="Kaldır"
+                    aria-label={t("group.remove")}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -181,7 +191,7 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
             ))}
             {groupFavorites.length === 0 && (
               <li className="text-xs text-muted-foreground">
-                Henüz paylaşılan mekan yok.
+                {t("group.noFavorites")}
               </li>
             )}
           </ul>
@@ -189,20 +199,20 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
           {canManage && addableFavorites.length > 0 && (
             <Card className="mt-3 p-3">
               <p className="mb-2 text-xs font-medium text-muted-foreground">
-                Favorilerinden ekle
+                {t("group.addFromFavorites")}
               </p>
               <ul className="flex flex-col gap-1">
                 {addableFavorites.slice(0, 8).map((f) => (
                   <li key={f.placeId} className="flex items-center justify-between gap-2">
                     <span className="truncate text-sm">
-                      {f.name ?? "İsimsiz mekan"}
+                      {f.name ?? t("place.unnamed")}
                     </span>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => addToGroup(f.placeId)}
                     >
-                      Ekle
+                      {t("group.add")}
                     </Button>
                   </li>
                 ))}

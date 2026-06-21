@@ -90,13 +90,14 @@ export function rankPlaces(input: RecommendationInput): RecommendationItem[] {
       WEIGHTS.price * price +
       WEIGHTS.history * history;
 
+    // Stable reason codes; the UI maps these to localized strings.
     const reasons: string[] = [];
-    if (distance >= 70) reasons.push("Yakın mesafe");
-    if (cuisine.matched) reasons.push("Favori mutfak ile eşleşiyor");
-    if (history === 100) reasons.push("Favorilerinde");
-    else if (history === 70) reasons.push("Favori mutfaklarına benziyor");
-    if (price === 100) reasons.push("Fiyat tercihine uygun");
-    if (reasons.length === 0) reasons.push("Bölgende popüler bir seçenek");
+    if (distance >= 70) reasons.push("near");
+    if (cuisine.matched) reasons.push("cuisineMatch");
+    if (history === 100) reasons.push("inFavorites");
+    else if (history === 70) reasons.push("similarToFavorites");
+    if (price === 100) reasons.push("priceMatch");
+    if (reasons.length === 0) reasons.push("popular");
 
     items.push({
       placeId: place.id,

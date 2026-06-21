@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useUserData } from "@/hooks/useUserData";
 import { useAppStore } from "@/store/useAppStore";
+import { useT } from "@/components/providers/I18nProvider";
 import { rankPlaces } from "@/lib/recommend";
 import type { Place, PlacesResponse } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -13,14 +14,10 @@ import { PreferenceForm } from "@/components/preferences/PreferenceForm";
 
 const PlaceMap = dynamic(() => import("@/components/map/PlaceMap"), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-      Harita yükleniyor...
-    </div>
-  ),
 });
 
 export default function HomePage() {
+  const t = useT();
   const geo = useGeolocation();
   const { favorites, preferences, isFavorite, toggleFavorite } = useUserData();
   const selectedPlaceId = useAppStore((s) => s.selectedPlaceId);
@@ -45,7 +42,7 @@ export default function HomePage() {
         const res = await fetch(
           `/api/places?lat=${coords!.lat}&lng=${coords!.lng}&radius=2000`,
         );
-        if (!res.ok) throw new Error("Mekanlar alınamadı");
+        if (!res.ok) throw new Error(t("home.placesError"));
         const data = (await res.json()) as PlacesResponse;
         if (!cancelled) setPlaces(data.items);
       } catch (err) {
@@ -87,19 +84,19 @@ export default function HomePage() {
     <div className="grid h-[calc(100vh-57px)] grid-cols-1 md:grid-cols-[380px_1fr]">
       <aside className="flex flex-col gap-4 overflow-y-auto border-r p-4">
         <div>
-          <h1 className="text-lg font-semibold">Yakındaki Mekanlar</h1>
+          <h1 className="text-lg font-semibold">{t("home.title")}</h1>
           <p className="text-sm text-muted-foreground">
             {geo.status === "denied"
-              ? "Konum izni reddedildi, Eskişehir merkez gösteriliyor."
+              ? t("home.locationDenied")
               : geo.status === "loading"
-                ? "Konum alınıyor..."
-                : `${places.length} mekan bulundu`}
+                ? t("home.locating")
+                : t("home.placesFound", { count: places.length })}
           </p>
         </div>
 
         {geo.status === "denied" && (
           <Button variant="outline" size="sm" onClick={geo.request}>
-            Konumu tekrar dene
+            {t("home.retryLocation")}
           </Button>
         )}
 
@@ -107,13 +104,15 @@ export default function HomePage() {
 
         {error && <p className="text-sm text-destructive">{error}</p>}
         {loadingPlaces && (
-          <p className="text-sm text-muted-foreground">Mekanlar yükleniyor...</p>
+          <p className="text-sm text-muted-foreground">
+            {t("home.loadingPlaces")}
+          </p>
         )}
 
         {recommendations.length > 0 && (
           <section>
             <h2 className="mb-2 text-sm font-semibold">
-              Senin İçin En Uygun Mekanlar
+              {t("home.recommendations")}
             </h2>
             <ul className="flex flex-col gap-2">
               {recommendations.map((rec) => {
@@ -138,7 +137,7 @@ export default function HomePage() {
 
         {places.length > 0 && (
           <section>
-            <h2 className="mb-2 text-sm font-semibold">Tüm Mekanlar</h2>
+            <h2 className="mb-2 text-sm font-semibold">{t("home.allPlaces")}</h2>
             <ul className="flex flex-col gap-2">
               {places.map((p) => (
                 <li key={p.id}>
@@ -166,7 +165,7 @@ export default function HomePage() {
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            Konum bekleniyor...
+            {t("home.waitingLocation")}
           </div>
         )}
       </section>

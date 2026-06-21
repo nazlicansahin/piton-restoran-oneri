@@ -3,6 +3,8 @@
 import { Heart, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useT } from "@/components/providers/I18nProvider";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import type { Place, RecommendationItem } from "@/lib/types";
 
 interface PlaceCardProps {
@@ -22,6 +24,7 @@ export function PlaceCard({
   selected,
   recommendation,
 }: PlaceCardProps) {
+  const t = useT();
   return (
     <Card
       className={cn(
@@ -32,9 +35,11 @@ export function PlaceCard({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate font-medium">{place.name ?? "İsimsiz mekan"}</p>
+          <p className="truncate font-medium">
+            {place.name ?? t("place.unnamed")}
+          </p>
           <p className="text-xs text-muted-foreground">
-            {place.cuisine ?? "Mutfak belirtilmemiş"} · {place.distanceKm.toFixed(2)} km
+            {place.cuisine ?? t("place.noCuisine")} · {place.distanceKm.toFixed(2)} km
           </p>
         </div>
         <div className="flex items-center gap-1">
@@ -45,7 +50,9 @@ export function PlaceCard({
           )}
           <button
             type="button"
-            aria-label={isFavorite ? "Favorilerden çıkar" : "Favorilere ekle"}
+            aria-label={
+              isFavorite ? t("place.removeFavorite") : t("place.addFavorite")
+            }
             onClick={(e) => {
               e.stopPropagation();
               onToggleFavorite(place);
@@ -78,7 +85,7 @@ export function PlaceCard({
               key={r}
               className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground"
             >
-              {r}
+              {t(`reason.${r}` as TranslationKey)}
             </span>
           ))}
         </div>

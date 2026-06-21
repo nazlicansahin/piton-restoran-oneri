@@ -3,6 +3,7 @@
 import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useT } from "@/components/providers/I18nProvider";
 import { api } from "@/lib/api-client";
 import { useAppStore } from "@/store/useAppStore";
 import type { FavoriteDto, Place, PreferencesDto } from "@/lib/types";
@@ -13,6 +14,7 @@ import type { FavoriteDto, Place, PreferencesDto } from "@/lib/types";
  */
 export function useUserData() {
   const { user, getToken } = useAuth();
+  const t = useT();
   const favorites = useAppStore((s) => s.favorites);
   const preferences = useAppStore((s) => s.preferences);
   const setFavorites = useAppStore((s) => s.setFavorites);
@@ -54,7 +56,7 @@ export function useUserData() {
   const toggleFavorite = useCallback(
     async (place: Place) => {
       if (!user) {
-        toast.error("Favorilere eklemek için giriş yap.");
+        toast.error(t("fav.loginRequired"));
         return;
       }
       const token = await getToken();
@@ -98,10 +100,10 @@ export function useUserData() {
         } else {
           removeFavorite(place.id);
         }
-        toast.error("Favori güncellenemedi, tekrar dene.");
+        toast.error(t("fav.updateError"));
       }
     },
-    [user, getToken, favorites, addFavorite, removeFavorite],
+    [user, getToken, favorites, addFavorite, removeFavorite, t],
   );
 
   const savePreferences = useCallback(
@@ -111,7 +113,7 @@ export function useUserData() {
       cuisines: string[];
     }): Promise<boolean> => {
       if (!user) {
-        toast.error("Tercihleri kaydetmek için giriş yap.");
+        toast.error(t("prefs.loginRequired"));
         return false;
       }
       const token = await getToken();
@@ -119,14 +121,14 @@ export function useUserData() {
       try {
         const res = await api.putPreferences(token, next);
         setPreferences(res.item);
-        toast.success("Tercihler kaydedildi");
+        toast.success(t("prefs.saved"));
         return true;
       } catch {
-        toast.error("Tercihler kaydedilemedi");
+        toast.error(t("prefs.saveError"));
         return false;
       }
     },
-    [user, getToken, setPreferences],
+    [user, getToken, setPreferences, t],
   );
 
   return {

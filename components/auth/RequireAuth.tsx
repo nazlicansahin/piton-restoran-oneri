@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useT } from "@/components/providers/I18nProvider";
 
 /**
  * Client-side guard. Redirects unauthenticated users to /login.
@@ -10,6 +11,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
  */
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
+  const t = useT();
   const router = useRouter();
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   if (loading || !user) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
-        Yükleniyor...
+        {t("auth.loadingRedirect")}
       </div>
     );
   }

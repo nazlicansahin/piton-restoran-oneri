@@ -6,27 +6,32 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useUserData } from "@/hooks/useUserData";
 import { useAppStore } from "@/store/useAppStore";
+import { useT } from "@/components/providers/I18nProvider";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import type { PriceTier } from "@/lib/types";
 
-const CUISINE_OPTIONS = [
-  "Pizza",
-  "İtalyan",
-  "Burger",
-  "Kebap",
-  "Kafe",
-  "Tatlı",
-  "Deniz",
-  "Uzakdoğu",
-  "Vejetaryen",
+// `value` is the stable stored token (matched by the recommendation engine);
+// `key` selects the localized label.
+const CUISINE_OPTIONS: { value: string; key: TranslationKey }[] = [
+  { value: "Pizza", key: "cuisine.pizza" },
+  { value: "İtalyan", key: "cuisine.italian" },
+  { value: "Burger", key: "cuisine.burger" },
+  { value: "Kebap", key: "cuisine.kebab" },
+  { value: "Kafe", key: "cuisine.cafe" },
+  { value: "Tatlı", key: "cuisine.dessert" },
+  { value: "Deniz", key: "cuisine.seafood" },
+  { value: "Uzakdoğu", key: "cuisine.asian" },
+  { value: "Vejetaryen", key: "cuisine.vegetarian" },
 ];
 
-const PRICE_OPTIONS: { value: PriceTier; label: string }[] = [
-  { value: "budget", label: "Ekonomik" },
-  { value: "mid", label: "Orta" },
-  { value: "premium", label: "Lüks" },
+const PRICE_OPTIONS: { value: PriceTier; key: TranslationKey }[] = [
+  { value: "budget", key: "prefs.budget" },
+  { value: "mid", key: "prefs.mid" },
+  { value: "premium", key: "prefs.premium" },
 ];
 
 export function PreferenceForm() {
+  const t = useT();
   const { preferences, savePreferences } = useUserData();
   const setStorePreferences = useAppStore((s) => s.setPreferences);
   const [saving, setSaving] = useState(false);
@@ -56,21 +61,23 @@ export function PreferenceForm() {
   return (
     <div className="flex flex-col gap-3 rounded-lg border p-3">
       <div>
-        <Label className="text-xs uppercase text-muted-foreground">Mutfak</Label>
+        <Label className="text-xs uppercase text-muted-foreground">
+          {t("prefs.cuisine")}
+        </Label>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           {CUISINE_OPTIONS.map((c) => (
             <button
-              key={c}
+              key={c.value}
               type="button"
-              onClick={() => toggleCuisine(c)}
+              onClick={() => toggleCuisine(c.value)}
               className={cn(
                 "rounded-full border px-2.5 py-1 text-xs transition-colors",
-                preferences.cuisines.includes(c)
+                preferences.cuisines.includes(c.value)
                   ? "border-primary bg-primary text-primary-foreground"
                   : "hover:bg-muted",
               )}
             >
-              {c}
+              {t(c.key)}
             </button>
           ))}
         </div>
@@ -78,7 +85,7 @@ export function PreferenceForm() {
 
       <div>
         <Label htmlFor="distance" className="text-xs uppercase text-muted-foreground">
-          Maks. mesafe: {preferences.maxDistanceKm.toFixed(1)} km
+          {t("prefs.maxDistance", { km: preferences.maxDistanceKm.toFixed(1) })}
         </Label>
         <input
           id="distance"
@@ -93,7 +100,9 @@ export function PreferenceForm() {
       </div>
 
       <div>
-        <Label className="text-xs uppercase text-muted-foreground">Fiyat</Label>
+        <Label className="text-xs uppercase text-muted-foreground">
+          {t("prefs.price")}
+        </Label>
         <div className="mt-1.5 flex gap-1.5">
           {PRICE_OPTIONS.map((p) => (
             <button
@@ -112,14 +121,14 @@ export function PreferenceForm() {
                   : "hover:bg-muted",
               )}
             >
-              {p.label}
+              {t(p.key)}
             </button>
           ))}
         </div>
       </div>
 
       <Button size="sm" onClick={onSave} disabled={saving}>
-        {saving ? "Kaydediliyor..." : "Tercihleri Kaydet"}
+        {saving ? t("prefs.saving") : t("prefs.save")}
       </Button>
     </div>
   );

@@ -4,6 +4,22 @@ Akıllı restoran ve kafe öneri uygulaması. Kullanıcının konumunu algılar,
 çevredeki mekanları harita üzerinde gösterir ve tercihlerine göre öneriler
 sunar. PITON Technology take-home projesi.
 
+**Canlı demo:** https://piton-restoran-oneri.vercel.app
+
+## Ekran Görüntüleri
+
+Ana sayfa — harita, tercih paneli ve açıklanabilir öneriler (açık tema):
+
+![Ana sayfa - açık tema](docs/screenshots/home-light.png)
+
+Mutfak filtresi uygulanmış öneriler + koyu tema + İngilizce arayüz:
+
+![Ana sayfa - koyu tema, İngilizce](docs/screenshots/home-dark-en.png)
+
+Giriş ekranı (Google ve e-posta/şifre):
+
+![Giriş ekranı](docs/screenshots/login-dark-en.png)
+
 ## Stack
 
 - **Next.js 14** (App Router, TypeScript) + **Tailwind CSS** + **shadcn/ui**
@@ -12,6 +28,7 @@ sunar. PITON Technology take-home projesi.
 - **Leaflet** + **react-leaflet** — harita
 - **Overpass API** (OpenStreetMap) — mekan verisi, `/api/places` üzerinden proxy
 - **Zustand** + **Zod** — istemci durumu ve doğrulama
+- **next-themes** — karanlık/açık tema; **Vitest** — birim testler
 
 ## Mimari
 
@@ -34,6 +51,8 @@ Tarayıcı → Next.js sayfaları → app/api/* → (Overpass | Neon | Firebase 
 - **Öneri motoru:** Ağırlıklı, açıklanabilir puanlama (aşağıda).
 - **Favoriler:** Optimistik ekle/çıkar, sayfa yenilense bile Postgres'ten geri yüklenir.
 - **Gruplar:** Grup oluşturma, üyelik rolleri (owner/admin/member), paylaşılan grup favorileri, e-posta daveti.
+- **Karanlık mod:** `next-themes` ile sistem/açık/koyu tema, tercih kalıcı.
+- **Çok dil (TR/EN):** Hafif istemci tarafı i18n; dil seçimi `localStorage`'da saklanır.
 
 ## Öneri Algoritması
 
@@ -128,6 +147,18 @@ docker compose up --build
 | `npm run build` | Production build |
 | `npm run start` | Production sunucu |
 | `npm run lint` | ESLint |
+| `npm test` | Vitest birim testleri (öneri motoru) |
+
+## Testler
+
+Öneri motorunun çekirdeği saf ve deterministik olduğu için birim testlerle
+doğrulanır (`lib/recommend.test.ts`, `lib/cuisine.test.ts`): sert mesafe filtresi,
+ağırlıklı puanlama, eşitlik bozucular, mutfak eşleştirme (Türkçe karakter dâhil)
+ve fiyat sezgileri.
+
+```bash
+npm test
+```
 
 ## Deploy (Vercel)
 
@@ -139,4 +170,4 @@ docker compose up --build
 
 - **Phase 1 (tamam):** İskelet, harita + mekanlar, Firebase Auth (Google + e-posta), Neon şeması
 - **Phase 2 (tamam):** Favoriler & gruplar API'ları, öneri motoru + UI, tercih paneli, Docker
-- **Phase 3 (opsiyonel):** Karanlık mod, i18n, AI sohbet önerileri, değerlendirmeler/aktivite akışı
+- **Phase 3 (kısmen tamam):** Karanlık mod ✓, çok dil (TR/EN) ✓, birim testler ✓ · (kalan: AI sohbet önerileri, değerlendirmeler/aktivite akışı)

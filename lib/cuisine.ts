@@ -31,12 +31,11 @@ function normalize(value: string): string {
   return value
     .trim()
     .toLowerCase()
-    .replace(/ç/g, "c")
-    .replace(/ğ/g, "g")
+    // İ lowercases to "i" + combining dot; strip all combining marks so
+    // Turkish characters (İtalyan, ş, ö ...) collapse to ASCII reliably.
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/ı/g, "i")
-    .replace(/ö/g, "o")
-    .replace(/ş/g, "s")
-    .replace(/ü/g, "u")
     .replace(/[\s-]+/g, "_");
 }
 

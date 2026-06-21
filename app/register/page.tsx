@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useT } from "@/components/providers/I18nProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/card";
 
 export default function RegisterPage() {
+  const t = useT();
   const { signInWithGoogle, registerWithEmail } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -26,16 +28,16 @@ export default function RegisterPage() {
   async function handleRegister(e: FormEvent) {
     e.preventDefault();
     if (password.length < 6) {
-      toast.error("Şifre en az 6 karakter olmalı");
+      toast.error(t("auth.passwordShort"));
       return;
     }
     setBusy(true);
     try {
       await registerWithEmail(email, password);
-      toast.success("Hesap oluşturuldu");
+      toast.success(t("auth.registerSuccess"));
       router.push("/");
     } catch (err) {
-      toast.error("Kayıt başarısız: " + (err as Error).message);
+      toast.error(t("auth.registerFailed") + ": " + (err as Error).message);
     } finally {
       setBusy(false);
     }
@@ -45,10 +47,10 @@ export default function RegisterPage() {
     setBusy(true);
     try {
       await signInWithGoogle();
-      toast.success("Giriş başarılı");
+      toast.success(t("auth.loginSuccess"));
       router.push("/");
     } catch (err) {
-      toast.error("Google girişi başarısız: " + (err as Error).message);
+      toast.error(t("auth.googleFailed") + ": " + (err as Error).message);
     } finally {
       setBusy(false);
     }
@@ -58,10 +60,8 @@ export default function RegisterPage() {
     <div className="flex min-h-[calc(100vh-57px)] items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Kayıt Ol</CardTitle>
-          <CardDescription>
-            Yeni bir hesap oluştur veya Google ile devam et.
-          </CardDescription>
+          <CardTitle>{t("auth.registerTitle")}</CardTitle>
+          <CardDescription>{t("auth.registerDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <Button
@@ -70,18 +70,18 @@ export default function RegisterPage() {
             disabled={busy}
             className="w-full"
           >
-            Google ile devam et
+            {t("auth.google")}
           </Button>
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className="h-px flex-1 bg-border" />
-            veya
+            {t("auth.or")}
             <span className="h-px flex-1 bg-border" />
           </div>
 
           <form onSubmit={handleRegister} className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">E-posta</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -91,7 +91,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Şifre</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <Input
                 id="password"
                 type="password"
@@ -101,14 +101,14 @@ export default function RegisterPage() {
               />
             </div>
             <Button type="submit" disabled={busy} className="w-full">
-              Hesap Oluştur
+              {t("auth.registerButton")}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
-            Zaten hesabın var mı?{" "}
+            {t("auth.haveAccount")}{" "}
             <Link href="/login" className="underline">
-              Giriş yap
+              {t("auth.toLogin")}
             </Link>
           </p>
         </CardContent>

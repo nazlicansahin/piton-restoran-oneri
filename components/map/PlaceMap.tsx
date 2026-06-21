@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { useEffect, useMemo } from "react";
+import { useT } from "@/components/providers/I18nProvider";
 import type { Place } from "@/lib/types";
 
 // Fix default marker icons (Leaflet expects assets at a relative path).
@@ -62,6 +63,7 @@ export default function PlaceMap({
   places,
   selectedPlaceId,
 }: PlaceMapProps) {
+  const t = useT();
   const selectedPlace = useMemo(
     () => places.find((p) => p.id === selectedPlaceId),
     [places, selectedPlaceId],
@@ -80,16 +82,16 @@ export default function PlaceMap({
       <Recenter lat={lat} lng={lng} />
       <FlyToSelected place={selectedPlace} />
       <Marker position={[lat, lng]} icon={userIcon}>
-        <Popup>Buradasın</Popup>
+        <Popup>{t("map.here")}</Popup>
       </Marker>
       {places.map((p) => (
         <Marker key={p.id} position={[p.lat, p.lng]} icon={defaultIcon}>
           <Popup>
-            <strong>{p.name ?? "İsimsiz mekan"}</strong>
+            <strong>{p.name ?? t("place.unnamed")}</strong>
             <br />
-            {p.cuisine ?? "Mutfak belirtilmemiş"}
+            {p.cuisine ?? t("place.noCuisine")}
             <br />
-            <span className="text-xs">{p.address ?? "Adres yok"}</span>
+            <span className="text-xs">{p.address ?? t("place.noAddress")}</span>
             <br />
             <span className="text-xs">{p.distanceKm.toFixed(2)} km</span>
           </Popup>
