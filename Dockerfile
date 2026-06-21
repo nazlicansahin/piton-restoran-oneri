@@ -18,6 +18,8 @@ ARG NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
 ARG NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
 ARG NEXT_PUBLIC_FIREBASE_APP_ID
 ENV NEXT_TELEMETRY_DISABLED=1
+# Stub for `next build` page-data collection (no live DB in the image build).
+ENV DATABASE_URL=postgresql://ci:ci@127.0.0.1:5432/ci
 RUN npm run build
 
 # Stage 3 — minimal runtime image
