@@ -26,6 +26,16 @@ export const tr = {
   "home.waitingLocation": "Konum bekleniyor...",
   "home.mapLoading": "Harita yükleniyor...",
 
+  "chat.title": "Restoran Asistanı",
+  "chat.subtitle": "Yakındaki gerçek mekanlardan öneri",
+  "chat.welcome": "Merhaba! Örneğin: \"Yakında ekonomik pizza nerede?\" veya \"Arkadaşlarla kebap için sessiz bir yer\" diye sorabilirsin.",
+  "chat.placeholder": "Ne arıyorsun?",
+  "chat.open": "Sohbeti aç",
+  "chat.close": "Sohbeti kapat",
+  "chat.showOnMap": "Haritada göster",
+  "chat.error": "Yanıt alınamadı, tekrar dene.",
+  "chat.notConfigured": "AI asistan bu ortamda yapılandırılmamış (AI_GATEWAY_API_KEY gerekli).",
+
   "place.unnamed": "İsimsiz mekan",
   "place.noCuisine": "Mutfak belirtilmemiş",
   "place.noAddress": "Adres yok",
@@ -146,6 +156,16 @@ export const en: Record<TranslationKey, string> = {
   "home.allPlaces": "All Places",
   "home.waitingLocation": "Waiting for location...",
   "home.mapLoading": "Loading map...",
+
+  "chat.title": "Restaurant Assistant",
+  "chat.subtitle": "Suggestions from real nearby places",
+  "chat.welcome": "Hi! Try asking: \"Any budget pizza nearby?\" or \"A quiet kebab spot for friends.\"",
+  "chat.placeholder": "What are you looking for?",
+  "chat.open": "Open chat",
+  "chat.close": "Close chat",
+  "chat.showOnMap": "Show on map",
+  "chat.error": "Could not get a reply, try again.",
+  "chat.notConfigured": "AI assistant is not configured in this environment (AI_GATEWAY_API_KEY required).",
 
   "place.unnamed": "Unnamed place",
   "place.noCuisine": "Cuisine not specified",

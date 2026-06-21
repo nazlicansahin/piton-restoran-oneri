@@ -5,12 +5,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useUserData } from "@/hooks/useUserData";
 import { useAppStore } from "@/store/useAppStore";
-import { useT } from "@/components/providers/I18nProvider";
+import { useT, useI18n } from "@/components/providers/I18nProvider";
 import { rankPlaces } from "@/lib/recommend";
 import type { Place, PlacesResponse } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { PlaceCard } from "@/components/places/PlaceCard";
 import { PreferenceForm } from "@/components/preferences/PreferenceForm";
+import { RestaurantChat } from "@/components/chat/RestaurantChat";
+import type { ChatContextPayload } from "@/lib/chat/types";
 
 const PlaceMap = dynamic(() => import("@/components/map/PlaceMap"), {
   ssr: false,
@@ -18,6 +20,7 @@ const PlaceMap = dynamic(() => import("@/components/map/PlaceMap"), {
 
 export default function HomePage() {
   const t = useT();
+  const { locale } = useI18n();
   const geo = useGeolocation();
   const { favorites, preferences, isFavorite, toggleFavorite } = useUserData();
   const selectedPlaceId = useAppStore((s) => s.selectedPlaceId);
@@ -79,6 +82,21 @@ export default function HomePage() {
       },
     }).slice(0, 10);
   }, [places, preferences, favorites]);
+
+  const chatContext = useMemo((): ChatContextPayload => {
+    return {
+      locale,
+      userLocation: coords,
+      preferences: {
+        cuisines: preferences.cuisines,
+        maxDistanceKm: preferences.maxDistanceKm,
+        pricePreference: preferences.pricePreference,
+      },
+      favorites: Object.values(favorites),
+      places,
+      recommendations,
+    };
+  }, [locale, coords, preferences, favorites, places, recommendations]);
 
   return (
     <div className="grid h-[calc(100vh-57px)] grid-cols-1 md:grid-cols-[380px_1fr]">
@@ -169,6 +187,11 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      <RestaurantChat
+        context={chatContext}
+        onSelectPlace={setSelectedPlace}
+      />
     </div>
   );
 }

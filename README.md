@@ -53,6 +53,7 @@ Tarayıcı → Next.js sayfaları → app/api/* → (Overpass | Neon | Firebase 
 - **Gruplar:** Grup oluşturma, üyelik rolleri (owner/admin/member), paylaşılan grup favorileri, e-posta daveti.
 - **Karanlık mod:** `next-themes` ile sistem/açık/koyu tema, tercih kalıcı.
 - **Çok dil (TR/EN):** Hafif istemci tarafı i18n; dil seçimi `localStorage`'da saklanır.
+- **AI sohbet asistanı:** Vercel AI Gateway + yakındaki gerçek mekan listesi; uydurma yok.
 
 ## Öneri Algoritması
 
@@ -164,10 +165,11 @@ npm test
 
 1. Repoyu Vercel'e import edin (framework: Next.js)
 2. `.env.example` içindeki tüm değişkenleri Production + Preview ortamlarına ekleyin
-3. Deploy sonrası Vercel domain'ini Firebase **Authorized domains** listesine ekleyin (Google girişi için)
+3. **AI sohbet** için Vercel projesinde [AI Gateway](https://vercel.com/docs/ai-gateway) etkinleştirin veya `AI_GATEWAY_API_KEY` ekleyin
+4. Deploy sonrası Vercel domain'ini Firebase **Authorized domains** listesine ekleyin (Google girişi için)
 
 ## Yol haritası
 
 - **Phase 1 (tamam):** İskelet, harita + mekanlar, Firebase Auth (Google + e-posta), Neon şeması
 - **Phase 2 (tamam):** Favoriler & gruplar API'ları, öneri motoru + UI, tercih paneli, Docker
-- **Phase 3 (kısmen tamam):** Karanlık mod ✓, çok dil (TR/EN) ✓, birim testler ✓ · (kalan: AI sohbet önerileri, değerlendirmeler/aktivite akışı)
+- **Phase 3 (kısmen tamam):** Karanlık mod ✓, çok dil (TR/EN) ✓, birim testler ✓, AI sohbet ✓ · (kalan: değerlendirmeler/aktivite akışı)

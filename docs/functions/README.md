@@ -6,6 +6,7 @@ Canonical registry of documented functions. Add a row when you create a new `doc
 |-------------|---------------|--------|
 | [recommend.md](./recommend.md) | Recommendation scoring (`lib/recommend.ts`, `lib/cuisine.ts`) | Implemented (Phase 2) |
 | [favorites-groups.md](./favorites-groups.md) | Favorites, groups, preferences APIs + client state | Implemented (Phase 2) |
+| [chat.md](./chat.md) | AI chat assistant (`lib/chat/*`, `/api/chat`, `RestaurantChat`) | Implemented (Phase 3) |
 | [auth.md](./auth.md) | Auth helpers (`lib/auth/*`, `AuthProvider`) | Implemented (Phase 1) |
 | [places.md](./places.md) | Places + geo helpers (`lib/overpass.ts`, `lib/haversine.ts`, `useGeolocation`) | Implemented (Phase 1) |
 
