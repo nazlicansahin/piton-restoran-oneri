@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -29,36 +29,27 @@ const PRICE_OPTIONS: { value: PriceTier; label: string }[] = [
 export function PreferenceForm() {
   const { preferences, savePreferences } = useUserData();
   const setStorePreferences = useAppStore((s) => s.setPreferences);
-  const [cuisines, setCuisines] = useState<string[]>([]);
-  const [maxDistanceKm, setMaxDistanceKm] = useState(3);
-  const [price, setPrice] = useState<PriceTier | null>(null);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    setCuisines(preferences.cuisines);
-    setMaxDistanceKm(preferences.maxDistanceKm);
-    setPrice(preferences.pricePreference);
-  }, [preferences]);
-
-  // Apply locally so recommendations react instantly (even before saving).
-  useEffect(() => {
-    setStorePreferences({
-      maxDistanceKm,
-      pricePreference: price,
-      cuisines,
-      updatedAt: preferences.updatedAt,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cuisines, maxDistanceKm, price]);
+  // The Zustand store is the single source of truth so recommendations react
+  // instantly. Each handler patches the store; Save persists to the server.
+  const patch = (changes: Partial<typeof preferences>) =>
+    setStorePreferences({ ...preferences, ...changes });
 
   const toggleCuisine = (c: string) =>
-    setCuisines((prev) =>
-      prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c],
-    );
+    patch({
+      cuisines: preferences.cuisines.includes(c)
+        ? preferences.cuisines.filter((x) => x !== c)
+        : [...preferences.cuisines, c],
+    });
 
   const onSave = async () => {
     setSaving(true);
-    await savePreferences({ maxDistanceKm, pricePreference: price, cuisines });
+    await savePreferences({
+      maxDistanceKm: preferences.maxDistanceKm,
+      pricePreference: preferences.pricePreference,
+      cuisines: preferences.cuisines,
+    });
     setSaving(false);
   };
 
@@ -74,7 +65,7 @@ export function PreferenceForm() {
               onClick={() => toggleCuisine(c)}
               className={cn(
                 "rounded-full border px-2.5 py-1 text-xs transition-colors",
-                cuisines.includes(c)
+                preferences.cuisines.includes(c)
                   ? "border-primary bg-primary text-primary-foreground"
                   : "hover:bg-muted",
               )}
@@ -87,7 +78,7 @@ export function PreferenceForm() {
 
       <div>
         <Label htmlFor="distance" className="text-xs uppercase text-muted-foreground">
-          Maks. mesafe: {maxDistanceKm.toFixed(1)} km
+          Maks. mesafe: {preferences.maxDistanceKm.toFixed(1)} km
         </Label>
         <input
           id="distance"
@@ -95,8 +86,8 @@ export function PreferenceForm() {
           min={0.5}
           max={10}
           step={0.5}
-          value={maxDistanceKm}
-          onChange={(e) => setMaxDistanceKm(Number(e.target.value))}
+          value={preferences.maxDistanceKm}
+          onChange={(e) => patch({ maxDistanceKm: Number(e.target.value) })}
           className="mt-1.5 w-full accent-primary"
         />
       </div>
@@ -108,10 +99,15 @@ export function PreferenceForm() {
             <button
               key={p.value}
               type="button"
-              onClick={() => setPrice(price === p.value ? null : p.value)}
+              onClick={() =>
+                patch({
+                  pricePreference:
+                    preferences.pricePreference === p.value ? null : p.value,
+                })
+              }
               className={cn(
                 "flex-1 rounded-md border px-2 py-1 text-xs transition-colors",
-                price === p.value
+                preferences.pricePreference === p.value
                   ? "border-primary bg-primary text-primary-foreground"
                   : "hover:bg-muted",
               )}
