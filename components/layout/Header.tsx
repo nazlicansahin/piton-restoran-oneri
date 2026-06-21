@@ -9,9 +9,21 @@ export function Header() {
 
   return (
     <header className="flex items-center justify-between border-b px-4 py-3">
-      <Link href="/" className="font-semibold">
-        Restoran Öneri
-      </Link>
+      <div className="flex items-center gap-4">
+        <Link href="/" className="font-semibold">
+          Restoran Öneri
+        </Link>
+        {user && (
+          <nav className="hidden items-center gap-3 text-sm text-muted-foreground sm:flex">
+            <Link href="/favorites" className="hover:text-foreground">
+              Favoriler
+            </Link>
+            <Link href="/groups" className="hover:text-foreground">
+              Gruplar
+            </Link>
+          </nav>
+        )}
+      </div>
       <nav className="flex items-center gap-2 text-sm">
         {loading ? null : user ? (
           <>

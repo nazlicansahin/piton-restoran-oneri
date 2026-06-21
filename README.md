@@ -24,7 +24,54 @@ Tarayıcı → Next.js sayfaları → app/api/* → (Overpass | Neon | Firebase 
 ```
 
 - Harita ve mekan listeleme **herkese açık** (giriş gerektirmez)
-- Favoriler / gruplar / tercihler **giriş gerektirir** (Phase 2)
+- Favoriler / gruplar / tercihler **giriş gerektirir**
+
+## Özellikler
+
+- **Konum + harita:** Tarayıcı Geolocation API'si, kullanıcı işareti, mekan işaretçileri (izin reddedilirse Eskişehir merkez).
+- **Canlı mekan verisi:** Overpass'tan restoran/kafe/fast-food; isim, mutfak, adres, mesafe.
+- **Tercih paneli:** Mutfak türleri, maksimum mesafe, fiyat tercihi — anında öneriye yansır.
+- **Öneri motoru:** Ağırlıklı, açıklanabilir puanlama (aşağıda).
+- **Favoriler:** Optimistik ekle/çıkar, sayfa yenilense bile Postgres'ten geri yüklenir.
+- **Gruplar:** Grup oluşturma, üyelik rolleri (owner/admin/member), paylaşılan grup favorileri, e-posta daveti.
+
+## Öneri Algoritması
+
+Saf, deterministik bir fonksiyon (`lib/recommend.ts`). Önce sert filtre: `maxDistanceKm`
+dışındaki mekanlar elenir. Kalanlar 0–100 arası puanlanır:
+
+```
+toplam = 0.35·mesafe + 0.35·mutfak + 0.15·fiyat + 0.15·geçmiş
+```
+
+| Bileşen | Kural |
+|---------|-------|
+| Mesafe | `100 · (1 − mesafe/maxMesafe)` — yakın olan kazanır |
+| Mutfak | Tam eşleşme 100, mutfak etiketi yok 30, tercih yok 50, eşleşmiyor 0 |
+| Fiyat | Eşleşme 100, bilinmiyor/nötr 50, uyuşmazlık 0 (etiket yoksa sezgisel tahmin) |
+| Geçmiş | Favorilerde 100, favori mutfağa benziyor 70, değilse 0 |
+
+Eşitlik bozucu: önce kısa mesafe, sonra alfabetik isim. İlk 10 mekan
+"Senin İçin En Uygun Mekanlar" başlığı altında, puan ve gerekçe rozetleriyle gösterilir.
+
+> OSM fiyat etiketleri Türkiye'de seyrek; fiyat tahmini sezgiseldir (`fast_food`/`cafe` → ekonomik, lüks mutfaklar → premium). Bu sınırlama bilinçli bir tercihtir.
+
+## API uçları
+
+| Method | Path | Auth |
+|--------|------|------|
+| GET | `/api/places` | — |
+| GET | `/api/favorites` | ✓ |
+| PUT/DELETE | `/api/favorites/:placeId` | ✓ |
+| GET/PUT | `/api/me/preferences` | ✓ |
+| GET/POST | `/api/groups` | ✓ |
+| GET | `/api/groups/:id` | üye |
+| GET/POST | `/api/groups/:id/favorites` | üye / owner-admin |
+| DELETE | `/api/groups/:id/favorites/:placeId` | owner/admin |
+| POST | `/api/groups/:id/invites` | owner/admin |
+
+Tüm korumalı uçlar `Authorization: Bearer <firebaseIdToken>` bekler ve standart hata
+zarfı döner: `{ code, message, details?, requestId }`.
 
 ## Kurulum
 
@@ -49,6 +96,7 @@ Tarayıcı → Next.js sayfaları → app/api/* → (Overpass | Neon | Firebase 
 
    ```bash
    psql "$DATABASE_URL" -f db/migrations/001_initial.sql
+   psql "$DATABASE_URL" -f db/migrations/002_phase2.sql
    ```
 
 4. Geliştirme sunucusunu başlatın:
@@ -59,6 +107,18 @@ Tarayıcı → Next.js sayfaları → app/api/* → (Overpass | Neon | Firebase 
 
    - Harita: <http://localhost:3000>
    - Mekan API: <http://localhost:3000/api/places?lat=39.77&lng=30.52&radius=1500>
+
+## Docker ile çalıştırma
+
+`next.config.mjs` içinde `output: "standalone"` ayarı sayesinde imaj küçük kalır.
+`NEXT_PUBLIC_*` değişkenleri build sırasında istemci paketine gömüldüğü için
+`docker compose` bunları `.env.local`'den okur.
+
+```bash
+# .env.local doldurulduktan sonra:
+docker compose up --build
+# → http://localhost:3000
+```
 
 ## Komutlar
 
@@ -78,4 +138,5 @@ Tarayıcı → Next.js sayfaları → app/api/* → (Overpass | Neon | Firebase 
 ## Yol haritası
 
 - **Phase 1 (tamam):** İskelet, harita + mekanlar, Firebase Auth (Google + e-posta), Neon şeması
-- **Phase 2:** Favoriler & gruplar API'ları, öneri motoru UI, tercih paneli, Docker
+- **Phase 2 (tamam):** Favoriler & gruplar API'ları, öneri motoru + UI, tercih paneli, Docker
+- **Phase 3 (opsiyonel):** Karanlık mod, i18n, AI sohbet önerileri, değerlendirmeler/aktivite akışı

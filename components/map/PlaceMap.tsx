@@ -3,7 +3,7 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import type { Place } from "@/lib/types";
 
 // Fix default marker icons (Leaflet expects assets at a relative path).
@@ -33,13 +33,39 @@ function Recenter({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
+function FlyToSelected({
+  place,
+}: {
+  place: Place | undefined;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    if (place) {
+      map.flyTo([place.lat, place.lng], Math.max(map.getZoom(), 16), {
+        duration: 0.5,
+      });
+    }
+  }, [place, map]);
+  return null;
+}
+
 interface PlaceMapProps {
   lat: number;
   lng: number;
   places: Place[];
+  selectedPlaceId?: string | null;
 }
 
-export default function PlaceMap({ lat, lng, places }: PlaceMapProps) {
+export default function PlaceMap({
+  lat,
+  lng,
+  places,
+  selectedPlaceId,
+}: PlaceMapProps) {
+  const selectedPlace = useMemo(
+    () => places.find((p) => p.id === selectedPlaceId),
+    [places, selectedPlaceId],
+  );
   return (
     <MapContainer
       center={[lat, lng]}
@@ -52,6 +78,7 @@ export default function PlaceMap({ lat, lng, places }: PlaceMapProps) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <Recenter lat={lat} lng={lng} />
+      <FlyToSelected place={selectedPlace} />
       <Marker position={[lat, lng]} icon={userIcon}>
         <Popup>Buradasın</Popup>
       </Marker>
