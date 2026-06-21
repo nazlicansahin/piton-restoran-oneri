@@ -7,8 +7,8 @@ PITON Technology take-home: smart restaurant recommendation + map web app.
 - Next.js 14+ (App Router, TypeScript)
 - shadcn/ui + Tailwind
 - Zustand (UI cache + optimistic updates)
-- Firebase Auth (anonymous default; Google login = bonus)
-- Postgres (favorites, groups, preferences)
+- Firebase Auth (Google + email/password; no anonymous auth)
+- Neon Postgres (favorites, groups, preferences)
 - Leaflet + react-leaflet
 - Overpass API (venues) via `/api/places`
 - REST only — no GraphQL
@@ -30,8 +30,10 @@ Domains: `auth`, `places`, `recommendation`, `favorites`, `groups`
 
 ## Auth
 
+- Sign-in via Google or email/password only — anonymous auth is disabled
+- Map + nearby places browsing is public; favorites/groups/preferences require login
 - Client sends `Authorization: Bearer <firebaseIdToken>`
-- Server verifies token, maps `firebase_uid → users.id`
+- Server verifies token via `firebase-admin`, maps `firebase_uid → users.id`
 - Never trust `user_id` from client body/query
 
 ## Build order
@@ -48,7 +50,7 @@ Domains: `auth`, `places`, `recommendation`, `favorites`, `groups`
 - Do not dockerize Firebase
 - Do not add GraphQL
 - Do not store all OSM venues — only interacted place snapshots
-- Google login is bonus, not blocking core delivery
+- Do not enable anonymous auth
 - Keep changes minimal and focused
 
 ## Function documentation

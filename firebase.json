@@ -1,0 +1,11 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "PITON Restoran Oneri",
+        "supportEmail": "nnazlicansahin@gmail.com"
+      }
+    }
+  }
+}

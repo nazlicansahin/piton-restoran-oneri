@@ -35,6 +35,9 @@ next-env.d.ts
 # docker
 .docker/
 
+# vercel
+.vercel/
+
 # misc
 .DS_Store
 Thumbs.db
@@ -42,3 +45,4 @@ Thumbs.db
 # editor
 .vscode/
 .idea/
+.vercel

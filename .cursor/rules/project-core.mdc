@@ -12,10 +12,15 @@ Geolocation map app listing nearby restaurants/cafes, user preferences, ranked r
 ## Stack (do not deviate without reason)
 
 - Next.js App Router + TypeScript
-- Firebase Auth (identity) + Postgres (app data)
+- Firebase Auth (Google + email/password; no anonymous) + Neon Postgres (app data)
 - Zustand for UI/optimistic cache only
 - Leaflet, Overpass API, REST route handlers
-- No GraphQL. No dockerized Firebase.
+- No GraphQL. No dockerized Firebase. No anonymous auth.
+
+## Auth scope
+
+- Public: map and nearby places browsing
+- Login required: preferences, favorites, groups
 
 ## Layering
 
