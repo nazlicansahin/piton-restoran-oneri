@@ -14,16 +14,17 @@ import type { Place, PlacesResponse } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlaceCard } from "@/components/places/PlaceCard";
+import { PlaceListPagination } from "@/components/places/PlaceListPagination";
 import { LocationSearch } from "@/components/location/LocationSearch";
 import { PreferenceForm } from "@/components/preferences/PreferenceForm";
 import { RestaurantChat } from "@/components/chat/RestaurantChat";
 import type { ChatContextPayload } from "@/lib/chat/types";
 import type { GeocodeResult } from "@/lib/geocode";
-import { cn } from "@/lib/utils";
 import { PlaceListSkeleton } from "@/components/skeletons/PlaceListSkeleton";
 import { MapSkeleton } from "@/components/skeletons/MapSkeleton";
 
-const MOBILE_PLACES_LIMIT = 12;
+const BEST_PICKS_LIMIT = 10;
+const NEARBY_PAGE_SIZE = 10;
 
 const PlaceMap = dynamic(() => import("@/components/map/PlaceMap"), {
   ssr: false,
@@ -52,8 +53,8 @@ export default function HomePage() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [loadingPlaces, setLoadingPlaces] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mobileListExpanded, setMobileListExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [nearbyPage, setNearbyPage] = useState(1);
   const [searchCenter, setSearchCenter] = useState<{
     lat: number;
     lng: number;
@@ -89,7 +90,7 @@ export default function HomePage() {
       setSearchCenterLabel(label);
       setSelectedPlace(null);
       setSearchQuery("");
-      setMobileListExpanded(false);
+      setNearbyPage(1);
     },
     [setSelectedPlace],
   );
@@ -172,7 +173,7 @@ export default function HomePage() {
           .map((f) => f.cuisine)
           .filter((c): c is string => Boolean(c)),
       },
-    }).slice(0, 10);
+    }).slice(0, BEST_PICKS_LIMIT);
   }, [placesNearCenter, preferences, favorites]);
 
   const filteredRecommendations = useMemo(() => {
@@ -180,6 +181,44 @@ export default function HomePage() {
     const ids = new Set(filteredPlaces.map((p) => p.id));
     return recommendations.filter((r) => ids.has(r.placeId));
   }, [recommendations, filteredPlaces, isSearching]);
+
+  const bestPickIds = useMemo(
+    () => new Set(filteredRecommendations.map((rec) => rec.placeId)),
+    [filteredRecommendations],
+  );
+
+  const allNearbyPlacesExcludingBestPicks = useMemo(() => {
+    const source = isSearching ? filteredPlaces : sortedPlaces;
+    return source.filter((place) => !bestPickIds.has(place.id));
+  }, [sortedPlaces, filteredPlaces, bestPickIds, isSearching]);
+
+  const nearbyPageCount = Math.max(
+    1,
+    Math.ceil(allNearbyPlacesExcludingBestPicks.length / NEARBY_PAGE_SIZE),
+  );
+
+  const nearbyPlacesOnPage = useMemo(() => {
+    const safePage = Math.min(nearbyPage, nearbyPageCount);
+    const start = (safePage - 1) * NEARBY_PAGE_SIZE;
+    return allNearbyPlacesExcludingBestPicks.slice(
+      start,
+      start + NEARBY_PAGE_SIZE,
+    );
+  }, [
+    allNearbyPlacesExcludingBestPicks,
+    nearbyPage,
+    nearbyPageCount,
+  ]);
+
+  useEffect(() => {
+    setNearbyPage(1);
+  }, [searchCenter?.lat, searchCenter?.lng, searchQuery, places.length]);
+
+  useEffect(() => {
+    if (nearbyPage > nearbyPageCount) {
+      setNearbyPage(nearbyPageCount);
+    }
+  }, [nearbyPage, nearbyPageCount]);
 
   const chatContext = useMemo((): ChatContextPayload => {
     const nearestPlaces = sortedPlaces.slice(0, 50);
@@ -196,13 +235,9 @@ export default function HomePage() {
     };
   }, [locale, searchCenter, preferences, favorites, sortedPlaces, recommendations]);
 
-  const hiddenMobileCount = Math.max(
-    0,
-    filteredPlaces.length - MOBILE_PLACES_LIMIT,
-  );
-
   const showRecommendations = !loadingPlaces && filteredRecommendations.length > 0;
-  const showAllPlaces = !loadingPlaces && filteredPlaces.length > 0;
+  const showNearbyPlaces =
+    !loadingPlaces && allNearbyPlacesExcludingBestPicks.length > 0;
   const showPlacesSkeleton = loadingPlaces;
 
   const placesSubtitle = (() => {
@@ -286,7 +321,7 @@ export default function HomePage() {
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                setMobileListExpanded(false);
+                setNearbyPage(1);
               }}
               placeholder={t("home.searchPlaceholder")}
               aria-label={t("home.searchPlaceholder")}
@@ -301,7 +336,7 @@ export default function HomePage() {
                 aria-label={t("home.searchClear")}
                 onClick={() => {
                   setSearchQuery("");
-                  setMobileListExpanded(false);
+                  setNearbyPage(1);
                 }}
               >
                 <X className="h-4 w-4" />
@@ -320,8 +355,8 @@ export default function HomePage() {
 
         {showPlacesSkeleton && (
           <>
-            <PlaceListSkeleton count={3} />
-            <PlaceListSkeleton count={6} />
+            <PlaceListSkeleton count={BEST_PICKS_LIMIT} />
+            <PlaceListSkeleton count={NEARBY_PAGE_SIZE} />
           </>
         )}
 
@@ -353,19 +388,12 @@ export default function HomePage() {
           </section>
         )}
 
-        {showAllPlaces && (
+        {showNearbyPlaces && (
           <section>
-            <h2 className="mb-2 text-sm font-semibold">{t("home.allPlaces")}</h2>
+            <h2 className="mb-2 text-sm font-semibold">{t("home.nearbyPlaces")}</h2>
             <ul className="flex flex-col gap-2">
-              {filteredPlaces.map((p, index) => (
-                <li
-                  key={p.id}
-                  className={cn(
-                    index >= MOBILE_PLACES_LIMIT &&
-                      !mobileListExpanded &&
-                      "hidden md:list-item",
-                  )}
-                >
+              {nearbyPlacesOnPage.map((p) => (
+                <li key={p.id}>
                   <PlaceCard
                     place={p}
                     isFavorite={isFavorite(p.id)}
@@ -376,19 +404,11 @@ export default function HomePage() {
                 </li>
               ))}
             </ul>
-            {hiddenMobileCount > 0 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2 w-full md:hidden"
-                onClick={() => setMobileListExpanded((v) => !v)}
-              >
-                {mobileListExpanded
-                  ? t("home.showLess")
-                  : t("home.showMore", { count: hiddenMobileCount })}
-              </Button>
-            )}
+            <PlaceListPagination
+              page={Math.min(nearbyPage, nearbyPageCount)}
+              pageCount={nearbyPageCount}
+              onPageChange={setNearbyPage}
+            />
           </section>
         )}
       </aside>
