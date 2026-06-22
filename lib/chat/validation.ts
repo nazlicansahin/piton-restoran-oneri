@@ -10,8 +10,6 @@ const placeSchema = z.object({
   lng: z.number(),
   category: z.enum(["restaurant", "cafe", "fast_food"]),
   distanceKm: z.number(),
-  photoUrl: z.string().url().nullable().optional().transform((v) => v ?? null),
-  wikipediaTag: z.string().nullable().optional().transform((v) => v ?? null),
 });
 
 export const chatContextSchema = z.object({

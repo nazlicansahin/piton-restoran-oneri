@@ -11,8 +11,6 @@ function place(overrides: Partial<Place> & { id: string }): Place {
     lng: 30.52,
     category: "restaurant",
     distanceKm: 1,
-    photoUrl: null,
-    wikipediaTag: null,
     ...overrides,
   };
 }

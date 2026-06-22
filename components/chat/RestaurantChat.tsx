@@ -2,18 +2,13 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { MapPin, MessageCircle, Send, X } from "lucide-react";
+import { MessageCircle, Send, X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/components/providers/I18nProvider";
-import {
-  resolvePlacesFromText,
-  stripPlaceIdMarkers,
-} from "@/lib/chat/place-refs";
 import type { ChatContextPayload } from "@/lib/chat/types";
-import type { Place } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 function messageText(message: UIMessage): string {
@@ -21,45 +16,6 @@ function messageText(message: UIMessage): string {
     .filter((p): p is { type: "text"; text: string } => p.type === "text")
     .map((p) => p.text)
     .join("");
-}
-
-function ChatPlaceCards({
-  places,
-  onSelectPlace,
-}: {
-  places: Place[];
-  onSelectPlace?: (placeId: string) => void;
-}) {
-  const { t } = useI18n();
-
-  if (places.length === 0 || !onSelectPlace) return null;
-
-  return (
-    <div className="mt-2 flex flex-col gap-1.5">
-      {places.map((place) => (
-        <button
-          key={place.id}
-          type="button"
-          onClick={() => onSelectPlace(place.id)}
-          className="w-full rounded-lg border border-border/80 bg-background p-2.5 text-left transition-colors hover:bg-accent"
-        >
-          <p className="font-medium leading-tight">
-            {place.name ?? t("place.unnamed")}
-          </p>
-          <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3 shrink-0" />
-            <span className="truncate">
-              {place.cuisine ?? t("place.noCuisine")} ·{" "}
-              {place.distanceKm.toFixed(2)} km
-            </span>
-          </p>
-          <span className="mt-1 inline-block text-[10px] font-medium text-primary">
-            {t("chat.viewOnMap")}
-          </span>
-        </button>
-      ))}
-    </div>
-  );
 }
 
 interface RestaurantChatProps {
@@ -97,6 +53,11 @@ export function RestaurantChat({ context, onSelectPlace }: RestaurantChatProps) 
     setInput("");
   };
 
+  const handlePlaceLink = (text: string) => {
+    const match = text.match(/\[([^\]]+)\]/);
+    if (match && onSelectPlace) onSelectPlace(match[1]);
+  };
+
   return (
     // z-[1100]: above Leaflet panes (400–700) and controls (1000). During zoom
     // Leaflet transforms tile layers, which would bury a lower z-index overlay.
@@ -125,33 +86,27 @@ export function RestaurantChat({ context, onSelectPlace }: RestaurantChatProps) 
               </p>
             )}
             {messages.map((m) => {
-              const rawText = messageText(m);
+              const text = messageText(m);
               const isUser = m.role === "user";
-              const suggestedPlaces = !isUser
-                ? resolvePlacesFromText(rawText, context.places)
-                : [];
-              const displayText = !isUser
-                ? stripPlaceIdMarkers(rawText)
-                : rawText;
-
               return (
                 <div
                   key={m.id}
                   className={cn(
-                    "max-w-[92%] rounded-lg px-3 py-2 text-sm",
+                    "max-w-[92%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap",
                     isUser
-                      ? "ml-auto whitespace-pre-wrap bg-primary text-primary-foreground"
+                      ? "ml-auto bg-primary text-primary-foreground"
                       : "bg-muted text-foreground",
                   )}
                 >
-                  {displayText && (
-                    <p className="whitespace-pre-wrap">{displayText}</p>
-                  )}
-                  {!isUser && (
-                    <ChatPlaceCards
-                      places={suggestedPlaces}
-                      onSelectPlace={onSelectPlace}
-                    />
+                  {text}
+                  {!isUser && onSelectPlace && (
+                    <button
+                      type="button"
+                      className="mt-1 block text-xs underline opacity-80"
+                      onClick={() => handlePlaceLink(text)}
+                    >
+                      {t("chat.showOnMap")}
+                    </button>
                   )}
                 </div>
               );

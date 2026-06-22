@@ -7,16 +7,13 @@ import { useUserData } from "@/hooks/useUserData";
 import { useAppStore } from "@/store/useAppStore";
 import { useT, useI18n } from "@/components/providers/I18nProvider";
 import { rankPlaces } from "@/lib/recommend";
-import { filterPlaces } from "@/lib/places-search";
 import type { Place, PlacesResponse } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { PlaceCard } from "@/components/places/PlaceCard";
 import { PreferenceForm } from "@/components/preferences/PreferenceForm";
 import { RestaurantChat } from "@/components/chat/RestaurantChat";
 import type { ChatContextPayload } from "@/lib/chat/types";
 import { cn } from "@/lib/utils";
-import { Search, X } from "lucide-react";
 
 const MOBILE_PLACES_LIMIT = 12;
 
@@ -36,7 +33,6 @@ export default function HomePage() {
   const [loadingPlaces, setLoadingPlaces] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mobileListExpanded, setMobileListExpanded] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const coords = useMemo(() => {
     if (geo.lat != null && geo.lng != null) return { lat: geo.lat, lng: geo.lng };
@@ -78,13 +74,6 @@ export default function HomePage() {
     [places],
   );
 
-  const filteredPlaces = useMemo(
-    () => filterPlaces(sortedPlaces, searchQuery),
-    [sortedPlaces, searchQuery],
-  );
-
-  const isSearching = searchQuery.trim().length > 0;
-
   const recommendations = useMemo(() => {
     const favoriteList = Object.values(favorites);
     return rankPlaces({
@@ -102,12 +91,6 @@ export default function HomePage() {
       },
     }).slice(0, 10);
   }, [places, preferences, favorites]);
-
-  const filteredRecommendations = useMemo(() => {
-    if (!isSearching) return recommendations;
-    const ids = new Set(filteredPlaces.map((p) => p.id));
-    return recommendations.filter((r) => ids.has(r.placeId));
-  }, [recommendations, filteredPlaces, isSearching]);
 
   const chatContext = useMemo((): ChatContextPayload => {
     const nearestPlaces = sortedPlaces.slice(0, 50);
@@ -127,11 +110,8 @@ export default function HomePage() {
 
   const hiddenMobileCount = Math.max(
     0,
-    filteredPlaces.length - MOBILE_PLACES_LIMIT,
+    sortedPlaces.length - MOBILE_PLACES_LIMIT,
   );
-
-  const showRecommendations = filteredRecommendations.length > 0;
-  const showAllPlaces = filteredPlaces.length > 0;
 
   return (
     <div className="flex h-[calc(100dvh-57px)] flex-col overflow-hidden md:grid md:h-[calc(100vh-57px)] md:grid-cols-[380px_1fr]">
@@ -188,52 +168,13 @@ export default function HomePage() {
           </p>
         )}
 
-        {places.length > 0 && (
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setMobileListExpanded(false);
-              }}
-              placeholder={t("home.searchPlaceholder")}
-              aria-label={t("home.searchPlaceholder")}
-              className="pl-9 pr-9"
-            />
-            {searchQuery && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-0 top-0 h-full w-9"
-                aria-label={t("home.searchClear")}
-                onClick={() => {
-                  setSearchQuery("");
-                  setMobileListExpanded(false);
-                }}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        )}
-
-        {isSearching && (
-          <p className="text-xs text-muted-foreground">
-            {filteredPlaces.length > 0
-              ? t("home.searchResults", { count: filteredPlaces.length })
-              : t("home.searchNoResults")}
-          </p>
-        )}
-
-        {showRecommendations && (
+        {recommendations.length > 0 && (
           <section>
             <h2 className="mb-2 text-sm font-semibold">
               {t("home.recommendations")}
             </h2>
             <ul className="flex flex-col gap-2">
-              {filteredRecommendations.map((rec) => {
+              {recommendations.map((rec) => {
                 const place = placeById.get(rec.placeId);
                 if (!place) return null;
                 return (
@@ -253,11 +194,11 @@ export default function HomePage() {
           </section>
         )}
 
-        {showAllPlaces && (
+        {sortedPlaces.length > 0 && (
           <section>
             <h2 className="mb-2 text-sm font-semibold">{t("home.allPlaces")}</h2>
             <ul className="flex flex-col gap-2">
-              {filteredPlaces.map((p, index) => (
+              {sortedPlaces.map((p, index) => (
                 <li
                   key={p.id}
                   className={cn(
