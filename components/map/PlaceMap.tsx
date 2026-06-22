@@ -2,8 +2,15 @@
 
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
-import { useEffect, useMemo } from "react";
+import {
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+import { useEffect, useMemo, useRef } from "react";
 import { Heart } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useT } from "@/components/providers/I18nProvider";
@@ -41,6 +48,13 @@ const userIcon = L.divIcon({
   iconAnchor: [10, 10],
 });
 
+const searchCenterIcon = L.divIcon({
+  className: "",
+  html: '<div class="search-pin" aria-hidden="true"><span class="search-pin__pulse"></span></div>',
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+});
+
 function ThemeTileLayer() {
   const { resolvedTheme } = useTheme();
   const dark = resolvedTheme === "dark";
@@ -69,11 +83,41 @@ function MapResizeFix() {
   return null;
 }
 
-function Recenter({ lat, lng }: { lat: number; lng: number }) {
+function SearchCenterFlyTo({
+  lat,
+  lng,
+}: {
+  lat: number;
+  lng: number;
+}) {
   const map = useMap();
+  const prev = useRef<{ lat: number; lng: number } | null>(null);
+
   useEffect(() => {
-    map.setView([lat, lng]);
+    if (
+      prev.current &&
+      Math.abs(prev.current.lat - lat) < 0.00001 &&
+      Math.abs(prev.current.lng - lng) < 0.00001
+    ) {
+      return;
+    }
+    map.flyTo([lat, lng], Math.max(map.getZoom(), 15), { duration: 0.45 });
+    prev.current = { lat, lng };
   }, [lat, lng, map]);
+
+  return null;
+}
+
+function MapClickSelect({
+  onSelect,
+}: {
+  onSelect: (lat: number, lng: number) => void;
+}) {
+  useMapEvents({
+    click(e) {
+      onSelect(e.latlng.lat, e.latlng.lng);
+    },
+  });
   return null;
 }
 
@@ -89,9 +133,17 @@ function FlyToSelected({ place }: { place: Place | undefined }) {
   return null;
 }
 
+function coordsDiffer(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+): boolean {
+  return Math.abs(a.lat - b.lat) > 0.00015 || Math.abs(a.lng - b.lng) > 0.00015;
+}
+
 interface PlaceMapProps {
-  lat: number;
-  lng: number;
+  searchCenter: { lat: number; lng: number };
+  userLocation?: { lat: number; lng: number } | null;
+  onSearchCenterChange: (lat: number, lng: number) => void;
   places: Place[];
   selectedPlaceId?: string | null;
   isFavorite: (placeId: string) => boolean;
@@ -143,8 +195,9 @@ function PlacePopup({
 }
 
 export default function PlaceMap({
-  lat,
-  lng,
+  searchCenter,
+  userLocation,
+  onSearchCenterChange,
   places,
   selectedPlaceId,
   isFavorite,
@@ -156,6 +209,9 @@ export default function PlaceMap({
     [places, selectedPlaceId],
   );
 
+  const showUserMarker =
+    userLocation != null && coordsDiffer(userLocation, searchCenter);
+
   const placeIcons = useMemo(() => {
     const icons = new Map<string, L.DivIcon>();
     for (const p of places) {
@@ -166,20 +222,39 @@ export default function PlaceMap({
 
   return (
     <MapContainer
-      center={[lat, lng]}
+      center={[searchCenter.lat, searchCenter.lng]}
       zoom={15}
       scrollWheelZoom
-      className="place-map h-full w-full"
+      className="place-map h-full w-full cursor-crosshair"
     >
       <ThemeTileLayer />
       <MapResizeFix />
-      <Recenter lat={lat} lng={lng} />
+      <MapClickSelect onSelect={onSearchCenterChange} />
+      <SearchCenterFlyTo lat={searchCenter.lat} lng={searchCenter.lng} />
       <FlyToSelected place={selectedPlace} />
-      <Marker position={[lat, lng]} icon={userIcon} zIndexOffset={1000}>
+
+      <Marker
+        position={[searchCenter.lat, searchCenter.lng]}
+        icon={searchCenterIcon}
+        zIndexOffset={900}
+      >
         <Popup className="place-popup">
-          <span className="font-medium">{t("map.here")}</span>
+          <span className="font-medium">{t("map.searchCenter")}</span>
         </Popup>
       </Marker>
+
+      {showUserMarker && userLocation && (
+        <Marker
+          position={[userLocation.lat, userLocation.lng]}
+          icon={userIcon}
+          zIndexOffset={800}
+        >
+          <Popup className="place-popup">
+            <span className="font-medium">{t("map.here")}</span>
+          </Popup>
+        </Marker>
+      )}
+
       {places.map((p) => (
         <Marker
           key={p.id}
@@ -196,6 +271,7 @@ export default function PlaceMap({
           </Popup>
         </Marker>
       ))}
+
     </MapContainer>
   );
 }
