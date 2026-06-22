@@ -8,6 +8,7 @@ import { useUserData } from "@/hooks/useUserData";
 import { useAppStore } from "@/store/useAppStore";
 import { useT, useI18n } from "@/components/providers/I18nProvider";
 import { rankPlaces } from "@/lib/recommend";
+import { withDistancesFromCenter } from "@/lib/places-distance";
 import { filterPlacesByName } from "@/lib/places-search";
 import type { Place, PlacesResponse } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -132,14 +133,19 @@ export default function HomePage() {
     };
   }, [searchCenter, preferences.maxDistanceKm, t]);
 
+  const placesNearCenter = useMemo(() => {
+    if (!searchCenter) return places;
+    return withDistancesFromCenter(places, searchCenter);
+  }, [places, searchCenter]);
+
   const placeById = useMemo(
-    () => new Map(places.map((p) => [p.id, p])),
-    [places],
+    () => new Map(placesNearCenter.map((p) => [p.id, p])),
+    [placesNearCenter],
   );
 
   const sortedPlaces = useMemo(
-    () => [...places].sort((a, b) => a.distanceKm - b.distanceKm),
-    [places],
+    () => [...placesNearCenter].sort((a, b) => a.distanceKm - b.distanceKm),
+    [placesNearCenter],
   );
 
   const filteredPlaces = useMemo(
@@ -152,7 +158,7 @@ export default function HomePage() {
   const recommendations = useMemo(() => {
     const favoriteList = Object.values(favorites);
     return rankPlaces({
-      places,
+      places: placesNearCenter,
       preferences: {
         cuisines: preferences.cuisines,
         maxDistanceKm: preferences.maxDistanceKm,
@@ -164,7 +170,7 @@ export default function HomePage() {
           .filter((c): c is string => Boolean(c)),
       },
     }).slice(0, 10);
-  }, [places, preferences, favorites]);
+  }, [placesNearCenter, preferences, favorites]);
 
   const filteredRecommendations = useMemo(() => {
     if (!isSearching) return recommendations;
@@ -223,7 +229,7 @@ export default function HomePage() {
                 onSearchCenterChange={(lat, lng) =>
                   handleSearchCenterChange(lat, lng, null)
                 }
-                places={places}
+                places={placesNearCenter}
                 selectedPlaceId={selectedPlaceId}
                 isFavorite={isFavorite}
                 onToggleFavorite={toggleFavorite}
@@ -316,7 +322,9 @@ export default function HomePage() {
         )}
 
         {showRecommendations && (
-          <section>
+          <section
+            key={`${searchCenter?.lat.toFixed(4)}:${searchCenter?.lng.toFixed(4)}`}
+          >
             <h2 className="mb-2 text-sm font-semibold">
               {t("home.recommendations")}
             </h2>
