@@ -34,7 +34,7 @@ export const tr = {
   "chat.close": "Sohbeti kapat",
   "chat.showOnMap": "Haritada göster",
   "chat.error": "Yanıt alınamadı, tekrar dene.",
-  "chat.notConfigured": "AI asistan bu ortamda yapılandırılmamış (AI_GATEWAY_API_KEY gerekli).",
+  "chat.notConfigured": "AI asistan yapılandırılmamış. OPENAI_API_KEY veya AI_GATEWAY_API_KEY ekleyin.",
 
   "place.unnamed": "İsimsiz mekan",
   "place.noCuisine": "Mutfak belirtilmemiş",
@@ -165,7 +165,7 @@ export const en: Record<TranslationKey, string> = {
   "chat.close": "Close chat",
   "chat.showOnMap": "Show on map",
   "chat.error": "Could not get a reply, try again.",
-  "chat.notConfigured": "AI assistant is not configured in this environment (AI_GATEWAY_API_KEY required).",
+  "chat.notConfigured": "AI assistant is not configured. Add OPENAI_API_KEY or AI_GATEWAY_API_KEY.",
 
   "place.unnamed": "Unnamed place",
   "place.noCuisine": "Cuisine not specified",

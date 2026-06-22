@@ -1,11 +1,10 @@
 import {
   convertToModelMessages,
-  gateway,
   streamText,
   type UIMessage,
 } from "ai";
 import { buildChatSystemPrompt } from "@/lib/chat/prompt";
-import { CHAT_MODEL, isChatConfigured } from "@/lib/chat/config";
+import { resolveChatModel, isChatConfigured } from "@/lib/chat/config";
 import { formatChatStreamError } from "@/lib/chat/errors";
 import { chatRequestSchema } from "@/lib/chat/validation";
 import { ApiException, makeRequestId, toErrorResponse } from "@/lib/http";
@@ -39,10 +38,10 @@ export async function POST(req: Request) {
     const uiMessages = messages as unknown as UIMessage[];
 
     const result = streamText({
-      model: gateway(CHAT_MODEL),
+      model: resolveChatModel(),
       system,
       messages: await convertToModelMessages(uiMessages),
-      maxOutputTokens: 700,
+      maxOutputTokens: 500,
       temperature: 0.4,
     });
 

@@ -6,15 +6,15 @@ Grounded AI restaurant assistant: answers only from the current nearby place lis
 
 Builds the system prompt injected into `streamText`. Includes user location, saved preferences, favorites, algorithm top picks, and up to 25 nearby places with OSM ids. Instructs the model to never invent venues.
 
-## `isChatConfigured()` (`lib/chat/config.ts`)
+## `resolveChatModel()` / `getChatProvider()` (`lib/chat/config.ts`)
 
-Returns true when `AI_GATEWAY_API_KEY`, `VERCEL_OIDC_TOKEN`, or `VERCEL_ENV` is set so `/api/chat` can authenticate with Vercel AI Gateway.
+Uses **OpenAI** when `OPENAI_API_KEY` is set; otherwise **Vercel AI Gateway**. Default OpenAI model: `gpt-4o-mini`.
 
 ## `POST /api/chat`
 
 - **Body:** `{ messages: UIMessage[], context: ChatContextPayload }`
 - **Auth:** none (public; context is client-supplied place snapshot)
-- **Model:** `CHAT_MODEL` env or `google/gemini-2.5-flash` via AI Gateway
+- **Model:** `OPENAI_API_KEY` → `gpt-4o-mini` (preferred); else AI Gateway via `CHAT_MODEL`
 - **Response:** UI message stream (`toUIMessageStreamResponse`)
 - **503** when AI Gateway is not configured
 
