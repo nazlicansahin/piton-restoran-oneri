@@ -13,9 +13,11 @@ import type { Place, PlacesResponse } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlaceCard } from "@/components/places/PlaceCard";
+import { LocationSearch } from "@/components/location/LocationSearch";
 import { PreferenceForm } from "@/components/preferences/PreferenceForm";
 import { RestaurantChat } from "@/components/chat/RestaurantChat";
 import type { ChatContextPayload } from "@/lib/chat/types";
+import type { GeocodeResult } from "@/lib/geocode";
 import { cn } from "@/lib/utils";
 
 const MOBILE_PLACES_LIMIT = 12;
@@ -29,6 +31,10 @@ function coordsDiffer(
   b: { lat: number; lng: number },
 ): boolean {
   return Math.abs(a.lat - b.lat) > 0.00015 || Math.abs(a.lng - b.lng) > 0.00015;
+}
+
+function shortLocationLabel(label: string): string {
+  return label.split(",").slice(0, 2).join(",").trim();
 }
 
 export default function HomePage() {
@@ -48,6 +54,9 @@ export default function HomePage() {
     lat: number;
     lng: number;
   } | null>(null);
+  const [searchCenterLabel, setSearchCenterLabel] = useState<string | null>(
+    null,
+  );
 
   const userLocation = useMemo(() => {
     if (geo.lat != null && geo.lng != null) {
@@ -71,8 +80,9 @@ export default function HomePage() {
     coordsDiffer(userLocation, searchCenter);
 
   const handleSearchCenterChange = useCallback(
-    (lat: number, lng: number) => {
+    (lat: number, lng: number, label: string | null = null) => {
       setSearchCenter({ lat, lng });
+      setSearchCenterLabel(label);
       setSelectedPlace(null);
       setSearchQuery("");
       setMobileListExpanded(false);
@@ -80,9 +90,20 @@ export default function HomePage() {
     [setSelectedPlace],
   );
 
+  const handleLocationSelect = useCallback(
+    (result: GeocodeResult) => {
+      handleSearchCenterChange(
+        result.lat,
+        result.lng,
+        shortLocationLabel(result.label),
+      );
+    },
+    [handleSearchCenterChange],
+  );
+
   const resetToMyLocation = useCallback(() => {
     if (!userLocation) return;
-    handleSearchCenterChange(userLocation.lat, userLocation.lng);
+    handleSearchCenterChange(userLocation.lat, userLocation.lng, null);
   }, [userLocation, handleSearchCenterChange]);
 
   useEffect(() => {
@@ -178,6 +199,12 @@ export default function HomePage() {
     if (geo.status === "denied") return t("home.locationDenied");
     if (geo.status === "loading" && !searchCenter) return t("home.locating");
     if (loadingPlaces && places.length === 0) return t("home.loadingPlaces");
+    if (searchCenterLabel) {
+      return t("home.placesNearLabel", {
+        label: searchCenterLabel,
+        count: places.length,
+      });
+    }
     if (isCustomSearchCenter) {
       return t("home.placesNearSelected", { count: places.length });
     }
@@ -193,7 +220,9 @@ export default function HomePage() {
               <PlaceMap
                 searchCenter={searchCenter}
                 userLocation={userLocation}
-                onSearchCenterChange={handleSearchCenterChange}
+                onSearchCenterChange={(lat, lng) =>
+                  handleSearchCenterChange(lat, lng, null)
+                }
                 places={places}
                 selectedPlaceId={selectedPlaceId}
                 isFavorite={isFavorite}
@@ -223,6 +252,8 @@ export default function HomePage() {
           <h1 className="text-lg font-semibold">{t("home.title")}</h1>
           <p className="text-sm text-muted-foreground">{placesSubtitle}</p>
         </div>
+
+        <LocationSearch onSelect={handleLocationSelect} />
 
         {geo.status === "denied" && (
           <Button variant="outline" size="sm" onClick={geo.request}>
