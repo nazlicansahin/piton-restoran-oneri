@@ -48,3 +48,60 @@ export async function geocodeQuery(
     }))
     .filter((item) => Number.isFinite(item.lat) && Number.isFinite(item.lng));
 }
+
+interface NominatimReverseAddress {
+  city?: string;
+  town?: string;
+  village?: string;
+  municipality?: string;
+  province?: string;
+  state?: string;
+  county?: string;
+}
+
+interface NominatimReverseResponse {
+  address?: NominatimReverseAddress;
+}
+
+const NOMINATIM_REVERSE_URL = "https://nominatim.openstreetmap.org/reverse";
+
+/** Reverse geocode coordinates to a city-level label (server-side only). */
+export async function reverseGeocodeCity(
+  lat: number,
+  lng: number,
+): Promise<string | null> {
+  const params = new URLSearchParams({
+    lat: String(lat),
+    lon: String(lng),
+    format: "json",
+    addressdetails: "1",
+    zoom: "10",
+  });
+
+  const res = await fetch(`${NOMINATIM_REVERSE_URL}?${params}`, {
+    headers: {
+      Accept: "application/json",
+      "User-Agent": "piton-restoran-oneri/1.0 (restaurant recommender)",
+    },
+    signal: AbortSignal.timeout(10_000),
+    next: { revalidate: 86_400 },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Reverse geocoding failed: ${res.status}`);
+  }
+
+  const data = (await res.json()) as NominatimReverseResponse;
+  const address = data.address;
+  if (!address) return null;
+
+  return (
+    address.city ??
+    address.town ??
+    address.municipality ??
+    address.province ??
+    address.state ??
+    address.county ??
+    null
+  );
+}

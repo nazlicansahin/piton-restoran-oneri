@@ -74,6 +74,7 @@ export function useUserData() {
           name: place.name,
           cuisine: place.cuisine,
           address: place.address,
+          city: null,
           lat: place.lat,
           lng: place.lng,
           createdAt: new Date().toISOString(),

@@ -25,6 +25,7 @@ export interface FavoriteDto {
   name: string | null;
   cuisine: string | null;
   address: string | null;
+  city?: string | null;
   lat: number;
   lng: number;
   createdAt: string;

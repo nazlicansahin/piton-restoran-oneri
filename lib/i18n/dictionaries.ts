@@ -87,6 +87,8 @@ export const tr = {
   "fav.count": "Kaydettiğin {count} mekan",
   "fav.empty": "Henüz favori eklemedin.",
   "fav.discover": "Haritadan keşfet",
+  "fav.unknownCity": "Diğer konumlar",
+  "fav.cityCount": "{count} mekan",
 
   "auth.loginTitle": "Giriş Yap",
   "auth.loginDesc": "Favorilerini kullanmak için giriş yap.",
@@ -228,6 +230,8 @@ export const en: Record<TranslationKey, string> = {
   "fav.count": "{count} saved places",
   "fav.empty": "You have no favorites yet.",
   "fav.discover": "Discover on the map",
+  "fav.unknownCity": "Other locations",
+  "fav.cityCount": "{count} places",
 
   "auth.loginTitle": "Sign In",
   "auth.loginDesc": "Sign in to use your favorites.",
