@@ -189,12 +189,14 @@ export default function HomePage() {
             {t("home.waitingLocation")}
           </div>
         )}
-      </section>
 
-      <RestaurantChat
-        context={chatContext}
-        onSelectPlace={setSelectedPlace}
-      />
+        {coords && (
+          <RestaurantChat
+            context={chatContext}
+            onSelectPlace={setSelectedPlace}
+          />
+        )}
+      </section>
     </div>
   );
 }

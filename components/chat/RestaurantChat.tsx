@@ -59,7 +59,9 @@ export function RestaurantChat({ context, onSelectPlace }: RestaurantChatProps) 
   };
 
   return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2">
+    // z-[1100]: above Leaflet panes (400–700) and controls (1000). During zoom
+    // Leaflet transforms tile layers, which would bury a lower z-index overlay.
+    <div className="pointer-events-none absolute bottom-4 right-4 z-[1100] flex flex-col items-end gap-2">
       {open && (
         <Card className="pointer-events-auto flex h-[min(70vh,520px)] w-[min(calc(100vw-2rem),380px)] flex-col shadow-lg">
           <header className="flex items-center justify-between border-b px-3 py-2">
