@@ -20,11 +20,14 @@ import { RestaurantChat } from "@/components/chat/RestaurantChat";
 import type { ChatContextPayload } from "@/lib/chat/types";
 import type { GeocodeResult } from "@/lib/geocode";
 import { cn } from "@/lib/utils";
+import { PlaceListSkeleton } from "@/components/skeletons/PlaceListSkeleton";
+import { MapSkeleton } from "@/components/skeletons/MapSkeleton";
 
 const MOBILE_PLACES_LIMIT = 12;
 
 const PlaceMap = dynamic(() => import("@/components/map/PlaceMap"), {
   ssr: false,
+  loading: () => <MapSkeleton />,
 });
 
 function coordsDiffer(
@@ -198,8 +201,9 @@ export default function HomePage() {
     filteredPlaces.length - MOBILE_PLACES_LIMIT,
   );
 
-  const showRecommendations = filteredRecommendations.length > 0;
-  const showAllPlaces = filteredPlaces.length > 0;
+  const showRecommendations = !loadingPlaces && filteredRecommendations.length > 0;
+  const showAllPlaces = !loadingPlaces && filteredPlaces.length > 0;
+  const showPlacesSkeleton = loadingPlaces;
 
   const placesSubtitle = (() => {
     if (geo.status === "denied") return t("home.locationDenied");
@@ -239,9 +243,7 @@ export default function HomePage() {
               </p>
             </>
           ) : (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              {t("home.waitingLocation")}
-            </div>
+            <MapSkeleton />
           )}
 
           {searchCenter && (
@@ -276,13 +278,8 @@ export default function HomePage() {
         <PreferenceForm />
 
         {error && <p className="text-sm text-destructive">{error}</p>}
-        {loadingPlaces && places.length > 0 && (
-          <p className="text-sm text-muted-foreground">
-            {t("home.loadingPlaces")}
-          </p>
-        )}
 
-        {places.length > 0 && (
+        {!loadingPlaces && places.length > 0 && (
           <div className="relative">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -319,6 +316,13 @@ export default function HomePage() {
               ? t("home.searchResults", { count: filteredPlaces.length })
               : t("home.searchNoResults")}
           </p>
+        )}
+
+        {showPlacesSkeleton && (
+          <>
+            <PlaceListSkeleton count={3} />
+            <PlaceListSkeleton count={6} />
+          </>
         )}
 
         {showRecommendations && (

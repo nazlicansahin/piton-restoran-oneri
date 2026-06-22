@@ -12,6 +12,7 @@ import { api, ApiClientError } from "@/lib/api-client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { GroupDetailSkeleton } from "@/components/skeletons/GroupDetailSkeleton";
 import type { GroupDetailsDto, GroupFavoriteDto } from "@/lib/types";
 
 function GroupDetailContent({ groupId }: { groupId: string }) {
@@ -99,9 +100,7 @@ function GroupDetailContent({ groupId }: { groupId: string }) {
   };
 
   if (loading) {
-    return (
-      <p className="p-6 text-sm text-muted-foreground">{t("groups.loading")}</p>
-    );
+    return <GroupDetailSkeleton />;
   }
   if (error || !group) {
     return (

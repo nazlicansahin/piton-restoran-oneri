@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useT } from "@/components/providers/I18nProvider";
@@ -21,13 +21,16 @@ export function useUserData() {
   const addFavorite = useAppStore((s) => s.addFavorite);
   const removeFavorite = useAppStore((s) => s.removeFavorite);
   const setPreferences = useAppStore((s) => s.setPreferences);
+  const [userDataLoading, setUserDataLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
       setFavorites([]);
+      setUserDataLoading(false);
       return;
     }
     let cancelled = false;
+    setUserDataLoading(true);
     (async () => {
       try {
         const token = await getToken();
@@ -41,6 +44,8 @@ export function useUserData() {
         setPreferences(prefs.item);
       } catch {
         // Non-fatal: user can still browse the public map.
+      } finally {
+        if (!cancelled) setUserDataLoading(false);
       }
     })();
     return () => {
@@ -134,6 +139,7 @@ export function useUserData() {
   return {
     favorites,
     preferences: preferences as PreferencesDto,
+    userDataLoading,
     isFavorite,
     toggleFavorite,
     savePreferences,

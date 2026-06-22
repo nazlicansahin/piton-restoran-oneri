@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GroupListSkeleton } from "@/components/skeletons/GroupListSkeleton";
 import type { GroupListItemDto } from "@/lib/types";
 
 function GroupsContent() {
@@ -95,7 +96,7 @@ function GroupsContent() {
       </Card>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">{t("groups.loading")}</p>
+        <GroupListSkeleton />
       ) : groups.length === 0 ? (
         <Card className="p-8 text-center text-sm text-muted-foreground">
           {t("groups.empty")}

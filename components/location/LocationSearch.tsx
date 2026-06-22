@@ -4,6 +4,7 @@ import { Loader2, MapPin, Search } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useT } from "@/components/providers/I18nProvider";
 import type { GeocodeResult } from "@/lib/geocode";
 
@@ -92,7 +93,17 @@ export function LocationSearch({ onSelect }: LocationSearchProps) {
 
       {error && <p className="text-xs text-destructive">{error}</p>}
 
-      {results.length > 0 && (
+      {loading && (
+        <ul className="flex flex-col gap-1 rounded-md border p-1">
+          {Array.from({ length: 3 }, (_, index) => (
+            <li key={index} className="px-2 py-1.5">
+              <Skeleton className="h-3 w-full" />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {!loading && results.length > 0 && (
         <ul className="flex flex-col gap-1 rounded-md border p-1">
           {results.map((item) => (
             <li key={`${item.lat}-${item.lng}-${item.label}`}>

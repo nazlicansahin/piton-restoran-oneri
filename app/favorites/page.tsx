@@ -7,6 +7,7 @@ import { RequireAuth } from "@/components/auth/RequireAuth";
 import { useUserData } from "@/hooks/useUserData";
 import { useT } from "@/components/providers/I18nProvider";
 import { groupFavoritesByCity } from "@/lib/favorite-city";
+import { FavoritesPageSkeleton } from "@/components/skeletons/FavoritesPageSkeleton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { FavoriteDto, Place } from "@/lib/types";
@@ -57,7 +58,7 @@ function FavoriteCard({
 
 function FavoritesContent() {
   const t = useT();
-  const { favorites, toggleFavorite } = useUserData();
+  const { favorites, toggleFavorite, userDataLoading } = useUserData();
   const items = useMemo(
     () =>
       Object.values(favorites).sort((a, b) =>
@@ -70,6 +71,10 @@ function FavoritesContent() {
     () => groupFavoritesByCity(items, unknownCityLabel),
     [items, unknownCityLabel],
   );
+
+  if (userDataLoading) {
+    return <FavoritesPageSkeleton />;
+  }
 
   return (
     <div className="mx-auto max-w-2xl p-6">
