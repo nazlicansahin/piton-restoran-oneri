@@ -79,7 +79,7 @@ export const tr = {
   "fav.discover": "Haritadan keşfet",
 
   "auth.loginTitle": "Giriş Yap",
-  "auth.loginDesc": "Favorilerini ve gruplarını kullanmak için giriş yap.",
+  "auth.loginDesc": "Favorilerini kullanmak için giriş yap.",
   "auth.registerTitle": "Kayıt Ol",
   "auth.registerDesc": "Yeni bir hesap oluştur veya Google ile devam et.",
   "auth.google": "Google ile devam et",
@@ -210,7 +210,7 @@ export const en: Record<TranslationKey, string> = {
   "fav.discover": "Discover on the map",
 
   "auth.loginTitle": "Sign In",
-  "auth.loginDesc": "Sign in to use your favorites and groups.",
+  "auth.loginDesc": "Sign in to use your favorites.",
   "auth.registerTitle": "Sign Up",
   "auth.registerDesc": "Create a new account or continue with Google.",
   "auth.google": "Continue with Google",

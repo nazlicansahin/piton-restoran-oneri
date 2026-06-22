@@ -22,9 +22,6 @@ export function Header() {
             <Link href="/favorites" className="hover:text-foreground">
               {t("header.favorites")}
             </Link>
-            <Link href="/groups" className="hover:text-foreground">
-              {t("header.groups")}
-            </Link>
           </nav>
         )}
       </div>

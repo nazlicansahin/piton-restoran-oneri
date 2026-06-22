@@ -4,8 +4,11 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { useEffect, useMemo } from "react";
+import { Heart } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useT } from "@/components/providers/I18nProvider";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { Place } from "@/lib/types";
 
 const TILE = {
@@ -77,6 +80,52 @@ interface PlaceMapProps {
   lng: number;
   places: Place[];
   selectedPlaceId?: string | null;
+  isFavorite: (placeId: string) => boolean;
+  onToggleFavorite: (place: Place) => void;
+}
+
+function PlacePopup({
+  place,
+  isFavorite,
+  onToggleFavorite,
+}: {
+  place: Place;
+  isFavorite: boolean;
+  onToggleFavorite: (place: Place) => void;
+}) {
+  const t = useT();
+
+  return (
+    <div className="place-popup-content min-w-[180px]">
+      <p className="font-semibold leading-tight">
+        {place.name ?? t("place.unnamed")}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {place.cuisine ?? t("place.noCuisine")} · {place.distanceKm.toFixed(2)} km
+      </p>
+      {place.address && (
+        <p className="mt-1 text-xs text-muted-foreground">{place.address}</p>
+      )}
+      <Button
+        type="button"
+        variant={isFavorite ? "secondary" : "outline"}
+        size="sm"
+        className="mt-2 h-8 w-full gap-1.5 text-xs"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFavorite(place);
+        }}
+      >
+        <Heart
+          className={cn(
+            "h-3.5 w-3.5",
+            isFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground",
+          )}
+        />
+        {isFavorite ? t("place.removeFavorite") : t("place.addFavorite")}
+      </Button>
+    </div>
+  );
 }
 
 export default function PlaceMap({
@@ -84,6 +133,8 @@ export default function PlaceMap({
   lng,
   places,
   selectedPlaceId,
+  isFavorite,
+  onToggleFavorite,
 }: PlaceMapProps) {
   const t = useT();
   const selectedPlace = useMemo(
@@ -122,15 +173,11 @@ export default function PlaceMap({
           zIndexOffset={p.id === selectedPlaceId ? 500 : 0}
         >
           <Popup className="place-popup">
-            <p className="font-semibold leading-tight">
-              {p.name ?? t("place.unnamed")}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {p.cuisine ?? t("place.noCuisine")} · {p.distanceKm.toFixed(2)} km
-            </p>
-            {p.address && (
-              <p className="mt-1 text-xs text-muted-foreground">{p.address}</p>
-            )}
+            <PlacePopup
+              place={p}
+              isFavorite={isFavorite(p.id)}
+              onToggleFavorite={onToggleFavorite}
+            />
           </Popup>
         </Marker>
       ))}

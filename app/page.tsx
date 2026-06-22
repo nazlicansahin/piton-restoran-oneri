@@ -184,6 +184,8 @@ export default function HomePage() {
             lng={coords.lng}
             places={places}
             selectedPlaceId={selectedPlaceId}
+            isFavorite={isFavorite}
+            onToggleFavorite={toggleFavorite}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
