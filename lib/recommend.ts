@@ -13,7 +13,7 @@ export interface RecommendationInput {
   };
 }
 
-const WEIGHTS = { distance: 0.4, cuisine: 0.4, history: 0.2 };
+const WEIGHTS = { distance: 0.5, cuisine: 0.5 };
 
 function distanceScore(distanceKm: number, maxDistanceKm: number): number {
   if (maxDistanceKm <= 0) return 0;
@@ -68,9 +68,7 @@ export function rankPlaces(input: RecommendationInput): RecommendationItem[] {
     const history = historyScore(place, favoriteIds, favoriteCuisines);
 
     const total =
-      WEIGHTS.distance * distance +
-      WEIGHTS.cuisine * cuisine.score +
-      WEIGHTS.history * history;
+      WEIGHTS.distance * distance + WEIGHTS.cuisine * cuisine.score;
 
     const reasons: string[] = [];
     if (distance >= 70) reasons.push("near");

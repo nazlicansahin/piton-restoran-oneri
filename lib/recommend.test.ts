@@ -72,14 +72,22 @@ describe("rankPlaces - cuisine match", () => {
 });
 
 describe("rankPlaces - history", () => {
-  it("gives a favorited place full history score and a reason", () => {
-    const input: RecommendationInput = {
-      ...baseInput([place({ id: "node/9", distanceKm: 1 })]),
-      favoriteSignals: { favoritePlaceIds: ["node/9"], favoriteCuisines: [] },
-    };
-    const result = rankPlaces(input);
-    expect(result[0].scoreBreakdown.history).toBe(100);
-    expect(result[0].reasons).toContain("inFavorites");
+  it("tags favorited places without boosting them above closer options", () => {
+    const result = rankPlaces({
+      ...baseInput([
+        place({ id: "fav-far", distanceKm: 2.5 }),
+        place({ id: "near", distanceKm: 0.3 }),
+      ]),
+      favoriteSignals: { favoritePlaceIds: ["fav-far"], favoriteCuisines: [] },
+    });
+
+    expect(result[0]?.placeId).toBe("near");
+    expect(result.find((r) => r.placeId === "fav-far")?.reasons).toContain(
+      "inFavorites",
+    );
+    expect(result.find((r) => r.placeId === "fav-far")?.scoreBreakdown.history).toBe(
+      100,
+    );
   });
 });
 
