@@ -84,6 +84,9 @@ export default function HomePage() {
   }, [places, preferences, favorites]);
 
   const chatContext = useMemo((): ChatContextPayload => {
+    const nearestPlaces = [...places]
+      .sort((a, b) => a.distanceKm - b.distanceKm)
+      .slice(0, 50);
     return {
       locale,
       userLocation: coords,
@@ -93,7 +96,7 @@ export default function HomePage() {
         pricePreference: preferences.pricePreference,
       },
       favorites: Object.values(favorites),
-      places,
+      places: nearestPlaces,
       recommendations,
     };
   }, [locale, coords, preferences, favorites, places, recommendations]);
