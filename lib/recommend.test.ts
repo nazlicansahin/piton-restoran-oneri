@@ -17,7 +17,7 @@ function place(overrides: Partial<Place> & { id: string }): Place {
 
 const baseInput = (places: Place[]): RecommendationInput => ({
   places,
-  preferences: { cuisines: [], maxDistanceKm: 3, pricePreference: null },
+  preferences: { cuisines: [], maxDistanceKm: 3 },
   favoriteSignals: { favoritePlaceIds: [], favoriteCuisines: [] },
 });
 
@@ -63,7 +63,7 @@ describe("rankPlaces - cuisine match", () => {
   it("scores exact cuisine matches at 100 and adds a reason", () => {
     const input: RecommendationInput = {
       ...baseInput([place({ id: "node/1", cuisine: "pizza", distanceKm: 1 })]),
-      preferences: { cuisines: ["Pizza"], maxDistanceKm: 3, pricePreference: null },
+      preferences: { cuisines: ["Pizza"], maxDistanceKm: 3 },
     };
     const result = rankPlaces(input);
     expect(result[0].scoreBreakdown.cuisine).toBe(100);
@@ -85,7 +85,7 @@ describe("rankPlaces - history", () => {
 
 describe("rankPlaces - tie-breaks and bounds", () => {
   it("breaks score ties by shorter distance, then alphabetical name", () => {
-    // Same cuisine/price/history, only distance differs slightly.
+    // Same cuisine/history, only distance differs slightly.
     const result = rankPlaces(
       baseInput([
         place({ id: "node/b", name: "Beta", distanceKm: 1.0 }),

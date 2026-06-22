@@ -61,7 +61,7 @@ export const api = {
     request<{ item: PreferencesDto }>("/api/me/preferences", token),
   putPreferences: (
     token: string,
-    body: { maxDistanceKm: number; pricePreference: string | null; cuisines: string[] },
+    body: { maxDistanceKm: number; cuisines: string[] },
   ) =>
     request<{ item: PreferencesDto }>("/api/me/preferences", token, {
       method: "PUT",

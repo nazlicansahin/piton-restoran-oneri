@@ -3,7 +3,6 @@ import type { FavoriteDto, PreferencesDto } from "@/lib/types";
 
 const DEFAULT_PREFERENCES: PreferencesDto = {
   maxDistanceKm: 3,
-  pricePreference: null,
   cuisines: [],
   updatedAt: null,
 };

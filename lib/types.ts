@@ -1,5 +1,3 @@
-export type PriceTier = "budget" | "mid" | "premium";
-
 export interface Place {
   id: string; // OSM id, e.g. "node/12345"
   name: string | null;
@@ -34,7 +32,6 @@ export interface FavoriteDto {
 
 export interface PreferencesDto {
   maxDistanceKm: number;
-  pricePreference: PriceTier | null;
   cuisines: string[];
   updatedAt: string | null;
 }
@@ -94,7 +91,6 @@ export interface RecommendationItem {
   scoreBreakdown: {
     distance: number;
     cuisine: number;
-    price: number;
     history: number;
   };
   reasons: string[];

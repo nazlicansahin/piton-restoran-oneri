@@ -1,5 +1,3 @@
-import type { PriceTier } from "./types";
-
 /**
  * Maps a user-facing cuisine selection to the set of OSM `cuisine` tag values
  * that should count as a related match. Keys are normalized (lowercase).
@@ -19,20 +17,10 @@ export const CUISINE_GROUPS: Record<string, string[]> = {
   steak: ["steak_house", "barbecue", "grill"],
 };
 
-const PREMIUM_CUISINES = new Set([
-  "steak_house",
-  "sushi",
-  "fine_dining",
-  "seafood",
-  "french",
-]);
-
 function normalize(value: string): string {
   return value
     .trim()
     .toLowerCase()
-    // İ lowercases to "i" + combining dot; strip all combining marks so
-    // Turkish characters (İtalyan, ş, ö ...) collapse to ASCII reliably.
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/ı/g, "i")
@@ -57,23 +45,7 @@ export function expandSelectedCuisines(selected: string[]): Set<string> {
     for (const tag of CUISINE_GROUPS[key] ?? []) {
       set.add(tag);
     }
-    // Also allow the raw lowercase selection to match a tag directly.
     set.add(sel.trim().toLowerCase());
   }
   return set;
-}
-
-/**
- * Heuristic price tier when OSM data lacks an explicit price tag.
- * Documented as a known limitation in the README.
- */
-export function inferPriceTier(
-  category: "restaurant" | "cafe" | "fast_food",
-  cuisine: string | null,
-): PriceTier | null {
-  if (category === "fast_food") return "budget";
-  const tokens = parsePlaceCuisines(cuisine);
-  if (tokens.some((t) => PREMIUM_CUISINES.has(t))) return "premium";
-  if (category === "cafe") return "budget";
-  return null; // unknown -> neutral price score
 }

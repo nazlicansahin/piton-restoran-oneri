@@ -40,10 +40,10 @@ export function buildChatSystemPrompt(ctx: ChatContextPayload): string {
   if (isEn) {
     return `You are a friendly restaurant guide for a map app in Turkey.
 Answer ONLY using the places listed below. Never invent venues, addresses, or scores.
-If nothing matches, say so and suggest relaxing filters (distance, cuisine, price).
+If nothing matches, say so and suggest relaxing filters (distance or cuisine).
 
 User location (lat,lng): ${locationLine}
-Saved preferences: cuisines=[${prefs.cuisines.join(", ") || "none"}], maxDistance=${prefs.maxDistanceKm} km, price=${prefs.pricePreference ?? "any"}
+Saved preferences: cuisines=[${prefs.cuisines.join(", ") || "none"}], maxDistance=${prefs.maxDistanceKm} km
 Favorites: ${favNames || "none"}
 
 Algorithm top picks (already scored):
@@ -61,10 +61,10 @@ Rules:
 
   return `Sen Türkiye'deki bir harita uygulamasının restoran rehberisin.
 Yalnızca aşağıdaki mekan listesini kullan. Asla uydurma mekan, adres veya puan verme.
-Uygun seçenek yoksa bunu söyle; mesafe, mutfak veya fiyat filtresini gevşetmeyi öner.
+Uygun seçenek yoksa bunu söyle; mesafe veya mutfak filtresini gevşetmeyi öner.
 
 Kullanıcı konumu (enlem,boylam): ${locationLine}
-Kayıtlı tercihler: mutfak=[${prefs.cuisines.join(", ") || "yok"}], maxMesafe=${prefs.maxDistanceKm} km, fiyat=${prefs.pricePreference ?? "fark etmez"}
+Kayıtlı tercihler: mutfak=[${prefs.cuisines.join(", ") || "yok"}], maxMesafe=${prefs.maxDistanceKm} km
 Favoriler: ${favNames || "yok"}
 
 Algoritma önerileri (puanlanmış):

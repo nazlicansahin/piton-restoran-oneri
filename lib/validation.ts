@@ -19,7 +19,6 @@ export type PlaceSnapshot = z.infer<typeof placeSnapshotSchema>;
 
 export const preferencesSchema = z.object({
   maxDistanceKm: z.coerce.number().min(0.1).max(50),
-  pricePreference: z.enum(["budget", "mid", "premium"]).nullish(),
   cuisines: z.array(z.string().trim().min(1).max(60)).max(30).default([]),
 });
 

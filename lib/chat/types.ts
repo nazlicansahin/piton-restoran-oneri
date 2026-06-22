@@ -9,10 +9,7 @@ import type {
 export interface ChatContextPayload {
   locale: Locale;
   userLocation: { lat: number; lng: number } | null;
-  preferences: Pick<
-    PreferencesDto,
-    "cuisines" | "maxDistanceKm" | "pricePreference"
-  >;
+  preferences: Pick<PreferencesDto, "cuisines" | "maxDistanceKm">;
   favorites: FavoriteDto[];
   places: Place[];
   recommendations: RecommendationItem[];

@@ -109,7 +109,6 @@ export function useUserData() {
   const savePreferences = useCallback(
     async (next: {
       maxDistanceKm: number;
-      pricePreference: string | null;
       cuisines: string[];
     }): Promise<boolean> => {
       if (!user) {

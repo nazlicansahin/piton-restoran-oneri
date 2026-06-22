@@ -22,7 +22,6 @@ export const chatContextSchema = z.object({
   preferences: z.object({
     cuisines: z.array(z.string()).max(20),
     maxDistanceKm: z.number().min(0.5).max(20),
-    pricePreference: z.enum(["budget", "mid", "premium"]).nullable(),
   }),
   favorites: z
     .array(
@@ -46,7 +45,6 @@ export const chatContextSchema = z.object({
         scoreBreakdown: z.object({
           distance: z.number(),
           cuisine: z.number(),
-          price: z.number(),
           history: z.number(),
         }),
         reasons: z.array(z.string()),
