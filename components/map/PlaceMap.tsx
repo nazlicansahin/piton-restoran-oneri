@@ -4,27 +4,53 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { useEffect, useMemo } from "react";
+import { useTheme } from "next-themes";
 import { useT } from "@/components/providers/I18nProvider";
 import type { Place } from "@/lib/types";
 
-// Fix default marker icons (Leaflet expects assets at a relative path).
-const defaultIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
+const TILE = {
+  light: {
+    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  },
+  dark: {
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  },
+} as const;
+
+function createPlaceIcon(selected: boolean) {
+  return L.divIcon({
+    className: "",
+    html: `<div class="place-pin${selected ? " place-pin--selected" : ""}" aria-hidden="true"></div>`,
+    iconSize: [26, 34],
+    iconAnchor: [13, 34],
+    popupAnchor: [0, -30],
+  });
+}
 
 const userIcon = L.divIcon({
-  className: "user-location-marker",
-  html: '<div style="width:16px;height:16px;border-radius:9999px;background:#2563eb;border:3px solid white;box-shadow:0 0 0 2px #2563eb"></div>',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
+  className: "",
+  html: '<div class="user-pin" aria-hidden="true"><span class="user-pin__pulse"></span></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
 });
+
+function ThemeTileLayer() {
+  const { resolvedTheme } = useTheme();
+  const dark = resolvedTheme === "dark";
+  const tile = dark ? TILE.dark : TILE.light;
+
+  return (
+    <TileLayer
+      key={dark ? "dark" : "light"}
+      attribution={tile.attribution}
+      url={tile.url}
+    />
+  );
+}
 
 function Recenter({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
@@ -34,11 +60,7 @@ function Recenter({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
-function FlyToSelected({
-  place,
-}: {
-  place: Place | undefined;
-}) {
+function FlyToSelected({ place }: { place: Place | undefined }) {
   const map = useMap();
   useEffect(() => {
     if (place) {
@@ -68,32 +90,47 @@ export default function PlaceMap({
     () => places.find((p) => p.id === selectedPlaceId),
     [places, selectedPlaceId],
   );
+
+  const placeIcons = useMemo(() => {
+    const icons = new Map<string, L.DivIcon>();
+    for (const p of places) {
+      icons.set(p.id, createPlaceIcon(p.id === selectedPlaceId));
+    }
+    return icons;
+  }, [places, selectedPlaceId]);
+
   return (
     <MapContainer
       center={[lat, lng]}
       zoom={15}
       scrollWheelZoom
-      className="h-full w-full"
+      className="place-map h-full w-full"
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <ThemeTileLayer />
       <Recenter lat={lat} lng={lng} />
       <FlyToSelected place={selectedPlace} />
-      <Marker position={[lat, lng]} icon={userIcon}>
-        <Popup>{t("map.here")}</Popup>
+      <Marker position={[lat, lng]} icon={userIcon} zIndexOffset={1000}>
+        <Popup className="place-popup">
+          <span className="font-medium">{t("map.here")}</span>
+        </Popup>
       </Marker>
       {places.map((p) => (
-        <Marker key={p.id} position={[p.lat, p.lng]} icon={defaultIcon}>
-          <Popup>
-            <strong>{p.name ?? t("place.unnamed")}</strong>
-            <br />
-            {p.cuisine ?? t("place.noCuisine")}
-            <br />
-            <span className="text-xs">{p.address ?? t("place.noAddress")}</span>
-            <br />
-            <span className="text-xs">{p.distanceKm.toFixed(2)} km</span>
+        <Marker
+          key={p.id}
+          position={[p.lat, p.lng]}
+          icon={placeIcons.get(p.id) ?? createPlaceIcon(false)}
+          zIndexOffset={p.id === selectedPlaceId ? 500 : 0}
+        >
+          <Popup className="place-popup">
+            <p className="font-semibold leading-tight">
+              {p.name ?? t("place.unnamed")}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {p.cuisine ?? t("place.noCuisine")} · {p.distanceKm.toFixed(2)} km
+            </p>
+            {p.address && (
+              <p className="mt-1 text-xs text-muted-foreground">{p.address}</p>
+            )}
           </Popup>
         </Marker>
       ))}

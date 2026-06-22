@@ -176,7 +176,8 @@ export default function HomePage() {
         )}
       </aside>
 
-      <section className="relative">
+      <section className="relative bg-muted/20 p-2 md:p-3">
+        <div className="relative h-full overflow-hidden rounded-xl border bg-background shadow-sm ring-1 ring-border/60">
         {coords ? (
           <PlaceMap
             lat={coords.lat}
@@ -196,6 +197,7 @@ export default function HomePage() {
             onSelectPlace={setSelectedPlace}
           />
         )}
+        </div>
       </section>
     </div>
   );
