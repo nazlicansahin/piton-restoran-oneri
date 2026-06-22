@@ -9,6 +9,8 @@ export interface Place {
   lng: number;
   category: "restaurant" | "cafe" | "fast_food";
   distanceKm: number;
+  photoUrl: string | null;
+  wikipediaTag: string | null;
 }
 
 export interface PlacesResponse {

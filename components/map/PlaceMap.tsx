@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import { useT } from "@/components/providers/I18nProvider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { PlacePopupPhoto } from "@/components/map/PlacePopupPhoto";
 import type { Place } from "@/lib/types";
 
 const TILE = {
@@ -110,7 +111,8 @@ function PlacePopup({
   const t = useT();
 
   return (
-    <div className="place-popup-content min-w-[180px]">
+    <div className="place-popup-content min-w-[220px] max-w-[240px]">
+      <PlacePopupPhoto place={place} />
       <p className="font-semibold leading-tight">
         {place.name ?? t("place.unnamed")}
       </p>

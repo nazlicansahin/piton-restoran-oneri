@@ -1,4 +1,5 @@
 import { haversineKm } from "./haversine";
+import { resolvePhotoFromOsmTags } from "./place-photo";
 import type { Place } from "./types";
 
 const OVERPASS_URL =
@@ -92,6 +93,8 @@ export async function fetchNearbyPlaces(
       lng: pLng,
       category,
       distanceKm: Number(haversineKm(lat, lng, pLat, pLng).toFixed(3)),
+      photoUrl: resolvePhotoFromOsmTags(tags),
+      wikipediaTag: tags.wikipedia ?? null,
     });
   }
 
