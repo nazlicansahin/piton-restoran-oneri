@@ -55,6 +55,20 @@ function ThemeTileLayer() {
   );
 }
 
+function MapResizeFix() {
+  const map = useMap();
+  useEffect(() => {
+    const fix = () => map.invalidateSize();
+    const timer = window.setTimeout(fix, 150);
+    window.addEventListener("resize", fix);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("resize", fix);
+    };
+  }, [map]);
+  return null;
+}
+
 function Recenter({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   useEffect(() => {
@@ -158,6 +172,7 @@ export default function PlaceMap({
       className="place-map h-full w-full"
     >
       <ThemeTileLayer />
+      <MapResizeFix />
       <Recenter lat={lat} lng={lng} />
       <FlyToSelected place={selectedPlace} />
       <Marker position={[lat, lng]} icon={userIcon} zIndexOffset={1000}>

@@ -23,6 +23,8 @@ export const tr = {
   "home.placesError": "Mekanlar alınamadı",
   "home.recommendations": "Senin İçin En Uygun Mekanlar",
   "home.allPlaces": "Tüm Mekanlar",
+  "home.showMore": "{count} mekan daha göster",
+  "home.showLess": "Daha az göster",
   "home.waitingLocation": "Konum bekleniyor...",
   "home.mapLoading": "Harita yükleniyor...",
 
@@ -154,6 +156,8 @@ export const en: Record<TranslationKey, string> = {
   "home.placesError": "Could not load places",
   "home.recommendations": "Best Picks For You",
   "home.allPlaces": "All Places",
+  "home.showMore": "Show {count} more places",
+  "home.showLess": "Show less",
   "home.waitingLocation": "Waiting for location...",
   "home.mapLoading": "Loading map...",
 

@@ -13,6 +13,9 @@ import { PlaceCard } from "@/components/places/PlaceCard";
 import { PreferenceForm } from "@/components/preferences/PreferenceForm";
 import { RestaurantChat } from "@/components/chat/RestaurantChat";
 import type { ChatContextPayload } from "@/lib/chat/types";
+import { cn } from "@/lib/utils";
+
+const MOBILE_PLACES_LIMIT = 12;
 
 const PlaceMap = dynamic(() => import("@/components/map/PlaceMap"), {
   ssr: false,
@@ -29,6 +32,7 @@ export default function HomePage() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [loadingPlaces, setLoadingPlaces] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mobileListExpanded, setMobileListExpanded] = useState(false);
 
   const coords = useMemo(() => {
     if (geo.lat != null && geo.lng != null) return { lat: geo.lat, lng: geo.lng };
@@ -58,10 +62,15 @@ export default function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [coords]);
+  }, [coords, t]);
 
   const placeById = useMemo(
     () => new Map(places.map((p) => [p.id, p])),
+    [places],
+  );
+
+  const sortedPlaces = useMemo(
+    () => [...places].sort((a, b) => a.distanceKm - b.distanceKm),
     [places],
   );
 
@@ -84,9 +93,7 @@ export default function HomePage() {
   }, [places, preferences, favorites]);
 
   const chatContext = useMemo((): ChatContextPayload => {
-    const nearestPlaces = [...places]
-      .sort((a, b) => a.distanceKm - b.distanceKm)
-      .slice(0, 50);
+    const nearestPlaces = sortedPlaces.slice(0, 50);
     return {
       locale,
       userLocation: coords,
@@ -99,11 +106,42 @@ export default function HomePage() {
       places: nearestPlaces,
       recommendations,
     };
-  }, [locale, coords, preferences, favorites, places, recommendations]);
+  }, [locale, coords, preferences, favorites, sortedPlaces, recommendations]);
+
+  const hiddenMobileCount = Math.max(
+    0,
+    sortedPlaces.length - MOBILE_PLACES_LIMIT,
+  );
 
   return (
-    <div className="grid h-[calc(100vh-57px)] grid-cols-1 md:grid-cols-[380px_1fr]">
-      <aside className="flex flex-col gap-4 overflow-y-auto border-r p-4">
+    <div className="flex h-[calc(100dvh-57px)] flex-col overflow-hidden md:grid md:h-[calc(100vh-57px)] md:grid-cols-[380px_1fr]">
+      <section className="relative order-1 h-[42vh] min-h-[260px] shrink-0 bg-muted/20 p-2 md:order-2 md:h-full md:min-h-0 md:p-3">
+        <div className="relative h-full overflow-hidden rounded-xl border bg-background shadow-sm ring-1 ring-border/60">
+          {coords ? (
+            <PlaceMap
+              lat={coords.lat}
+              lng={coords.lng}
+              places={places}
+              selectedPlaceId={selectedPlaceId}
+              isFavorite={isFavorite}
+              onToggleFavorite={toggleFavorite}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+              {t("home.waitingLocation")}
+            </div>
+          )}
+
+          {coords && (
+            <RestaurantChat
+              context={chatContext}
+              onSelectPlace={setSelectedPlace}
+            />
+          )}
+        </div>
+      </section>
+
+      <aside className="order-2 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto border-t p-4 md:order-1 md:border-r md:border-t-0">
         <div>
           <h1 className="text-lg font-semibold">{t("home.title")}</h1>
           <p className="text-sm text-muted-foreground">
@@ -156,12 +194,19 @@ export default function HomePage() {
           </section>
         )}
 
-        {places.length > 0 && (
+        {sortedPlaces.length > 0 && (
           <section>
             <h2 className="mb-2 text-sm font-semibold">{t("home.allPlaces")}</h2>
             <ul className="flex flex-col gap-2">
-              {places.map((p) => (
-                <li key={p.id}>
+              {sortedPlaces.map((p, index) => (
+                <li
+                  key={p.id}
+                  className={cn(
+                    index >= MOBILE_PLACES_LIMIT &&
+                      !mobileListExpanded &&
+                      "hidden md:list-item",
+                  )}
+                >
                   <PlaceCard
                     place={p}
                     isFavorite={isFavorite(p.id)}
@@ -172,35 +217,22 @@ export default function HomePage() {
                 </li>
               ))}
             </ul>
+            {hiddenMobileCount > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2 w-full md:hidden"
+                onClick={() => setMobileListExpanded((v) => !v)}
+              >
+                {mobileListExpanded
+                  ? t("home.showLess")
+                  : t("home.showMore", { count: hiddenMobileCount })}
+              </Button>
+            )}
           </section>
         )}
       </aside>
-
-      <section className="relative bg-muted/20 p-2 md:p-3">
-        <div className="relative h-full overflow-hidden rounded-xl border bg-background shadow-sm ring-1 ring-border/60">
-        {coords ? (
-          <PlaceMap
-            lat={coords.lat}
-            lng={coords.lng}
-            places={places}
-            selectedPlaceId={selectedPlaceId}
-            isFavorite={isFavorite}
-            onToggleFavorite={toggleFavorite}
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            {t("home.waitingLocation")}
-          </div>
-        )}
-
-        {coords && (
-          <RestaurantChat
-            context={chatContext}
-            onSelectPlace={setSelectedPlace}
-          />
-        )}
-        </div>
-      </section>
     </div>
   );
 }
