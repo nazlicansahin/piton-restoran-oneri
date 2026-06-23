@@ -1,5 +1,4 @@
 import type { FavoriteDto } from "@/lib/types";
-import { reverseGeocodeCity } from "@/lib/geocode";
 
 const COUNTRY_PATTERN = /^(türkiye|turkey|tr)$/i;
 
@@ -26,26 +25,6 @@ export function extractCityFromAddress(address: string | null): string | null {
   if (!last || /^\d+$/.test(last) || last.length < 2) return null;
 
   return last;
-}
-
-function coordCacheKey(lat: number, lng: number): string {
-  return `${lat.toFixed(3)},${lng.toFixed(3)}`;
-}
-
-/** Resolve city from address, falling back to reverse geocoding. */
-export async function resolveFavoriteCity(
-  favorite: Pick<FavoriteDto, "address" | "lat" | "lng">,
-  cache = new Map<string, string | null>(),
-): Promise<string | null> {
-  const fromAddress = extractCityFromAddress(favorite.address);
-  if (fromAddress) return fromAddress;
-
-  const key = coordCacheKey(favorite.lat, favorite.lng);
-  if (cache.has(key)) return cache.get(key) ?? null;
-
-  const city = await reverseGeocodeCity(favorite.lat, favorite.lng);
-  cache.set(key, city);
-  return city;
 }
 
 export interface FavoriteCityGroup {

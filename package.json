@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "db:migrate": "psql \"$DATABASE_URL_UNPOOLED\" -f db/migrations/001_initial.sql"
+    "db:migrate": "psql \"$DATABASE_URL_UNPOOLED\" -f db/migrations/001_initial.sql",
+    "db:migrate:city": "psql \"$DATABASE_URL_UNPOOLED\" -f db/migrations/003_places_city.sql"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.133",

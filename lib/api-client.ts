@@ -46,7 +46,11 @@ export const api = {
   // Favorites
   getFavorites: (token: string) =>
     request<{ items: FavoriteDto[] }>("/api/favorites", token),
-  putFavorite: (token: string, placeId: string, body: Omit<FavoriteDto, "placeId" | "createdAt">) =>
+  putFavorite: (
+    token: string,
+    placeId: string,
+    body: Omit<FavoriteDto, "placeId" | "createdAt" | "city">,
+  ) =>
     request<{ ok: true }>(`/api/favorites/${placeId}`, token, {
       method: "PUT",
       body: JSON.stringify(body),
