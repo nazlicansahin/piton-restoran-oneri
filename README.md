@@ -9,6 +9,8 @@
 | **Stack** | Next.js 14 · TypeScript · Firebase Auth · Neon Postgres · Leaflet · Overpass API |
 | **Yerel kurulum (TR)** | [docs/tr/README.md](docs/tr/README.md) |
 | **Local setup (EN)** | [docs/en/README.md](docs/en/README.md) |
+| **Teslim beklentileri (PDF)** | [docs/tr/DELIVERY.md](docs/tr/DELIVERY.md) |
+| **Tüm dokümantasyon** | [docs/README.md](docs/README.md) |
 
 ---
 
@@ -29,6 +31,7 @@
 - [Performans ve önbellekleme](#performans-ve-önbellekleme)
 - [Teslimat checklist](#teslimat-checklist)
 - [Yerel kurulum — adım adım rehber](#yerel-kurulum--adım-adım-rehber)
+- [Dokümantasyon (PDF teslim maddeleri)](#dokümantasyon-pdf-teslim-maddeleri)
 - [Lisans](#lisans)
 
 ---
@@ -46,6 +49,8 @@
 ### Giriş ekranı
 
 ![Giriş ekranı](docs/tr/screenshots/login-dark-en.png)
+
+Ekran bölgelerinin açıklaması: [docs/tr/screenshots/README.md](docs/tr/screenshots/README.md) · [English](docs/en/screenshots/README.md)
 
 ---
 
@@ -367,10 +372,14 @@ piton-restoran-oneri/
 │   └── i18n/                    # TR/EN sözlükler
 ├── db/migrations/               # SQL şema dosyaları
 ├── docs/
-│   ├── tr/README.md             # Yerel kurulum rehberi (TR)
+│   ├── README.md                # Dokümantasyon indeksi
+│   ├── tr/README.md             # Kurulum (Setup)
+│   ├── tr/STRUCTURE.md          # Dosya yapısı
+│   ├── tr/USAGE.md              # Kullanım + teknik tercihler
+│   ├── tr/DELIVERY.md           # PDF teslim beklentileri
 │   ├── tr/functions/            # Fonksiyon referansı (TR)
-│   ├── en/README.md             # Local setup guide (EN)
-│   └── en/functions/            # Function reference (EN)
+│   ├── en/                      # English equivalents
+│   └── …
 ├── .github/workflows/ci.yml     # CI pipeline
 ├── Dockerfile
 ├── docker-compose.yml
@@ -413,14 +422,18 @@ Overpass ve Nominatim **ücretsiz** servislerdir; yoğun kullanımda rate limit 
 
 ## Teslimat checklist
 
-PITON değerlendirme süreci için beklenen teslimatlar:
+PITON **PTN-RestoranOneri-V.1.0** PDF §4 teslim beklentileri — ayrıntılı eşleme: **[docs/tr/DELIVERY.md](docs/tr/DELIVERY.md)** · [English](docs/en/DELIVERY.md)
 
-- [x] **Public GitHub deposu** — [nazlicansahin/piton-restoran-oneri](https://github.com/nazlicansahin/piton-restoran-oneri)
-- [x] **README** — kurulum, mimari, algoritma, CI/CD, ekran görüntüleri (bu dosya)
-- [x] **Kurulum kılavuzu** — npm + Docker yolları
-- [x] **CI/CD** — GitHub Actions (lint + build + Docker build)
-- [x] **Production deploy** — Vercel canlı URL
-- [ ] **Demo videosu** — 3–5 dk ekran kaydı: konum, harita, tercih, öneriler, favori, (opsiyonel) grup ve AI chat; `hr@piton.com.tr` adresine paylaşım linki ile birlikte gönderilmeli
+| PDF maddesi | Durum | Dokümantasyon |
+|-------------|--------|---------------|
+| Public GitHub reposu | ✅ | [github.com/nazlicansahin/piton-restoran-oneri](https://github.com/nazlicansahin/piton-restoran-oneri) |
+| README — Kurulum | ✅ | [docs/tr/README.md](docs/tr/README.md) |
+| README — Dosya yapısı | ✅ | [docs/tr/STRUCTURE.md](docs/tr/STRUCTURE.md) |
+| README — Kullanım | ✅ | [docs/tr/USAGE.md](docs/tr/USAGE.md) |
+| README — Görseller | ✅ | [docs/tr/screenshots/README.md](docs/tr/screenshots/README.md) |
+| Video kaydı | ⏳ | Bkz. [DELIVERY.md](docs/tr/DELIVERY.md#43-video-kaydı) |
+| hr@piton.com.tr teslimi | ⏳ | Repo linki + video |
+| Production deploy (bonus) | ✅ | [piton-restoran-oneri.vercel.app](https://piton-restoran-oneri.vercel.app) |
 
 ### Demo videosu önerilen akış
 
@@ -502,6 +515,19 @@ npm run lint && npm test && npm run build
 ```
 
 Tam adımlar, `.env` alan açıklamaları ve **sık karşılaşılan hatalar**: [docs/tr/README.md](docs/tr/README.md).
+
+---
+
+## Dokümantasyon (PDF teslim maddeleri)
+
+| PDF §4 başlığı | Türkçe | English |
+|----------------|--------|---------|
+| Kurulum (Setup) | [docs/tr/README.md](docs/tr/README.md) | [docs/en/README.md](docs/en/README.md) |
+| Dosya yapısı | [docs/tr/STRUCTURE.md](docs/tr/STRUCTURE.md) | [docs/en/STRUCTURE.md](docs/en/STRUCTURE.md) |
+| Kullanım (Usage) | [docs/tr/USAGE.md](docs/tr/USAGE.md) | [docs/en/USAGE.md](docs/en/USAGE.md) |
+| Görseller | [docs/tr/screenshots/](docs/tr/screenshots/README.md) | [docs/en/screenshots/](docs/en/screenshots/README.md) |
+| Teslim + video | [docs/tr/DELIVERY.md](docs/tr/DELIVERY.md) | [docs/en/DELIVERY.md](docs/en/DELIVERY.md) |
+| İndeks | [docs/README.md](docs/README.md) | |
 
 ---
 

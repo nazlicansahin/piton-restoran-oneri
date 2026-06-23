@@ -5,7 +5,11 @@ Step-by-step instructions for running this project **on your own machine**.
 | | |
 |---|---|
 | **Project overview** | [Root README](../../README.md) |
-| **Function reference** | [docs/en/functions/](./functions/README.md) |
+| **File structure** | [STRUCTURE.md](./STRUCTURE.md) |
+| **Usage & technical choices** | [USAGE.md](./USAGE.md) |
+| **Delivery expectations (PDF §4)** | [DELIVERY.md](./DELIVERY.md) |
+| **Annotated screenshots** | [screenshots/README.md](./screenshots/README.md) |
+| **Function reference** | [functions/](./functions/README.md) |
 | **Türkçe kurulum** | [docs/tr/README.md](../tr/README.md) |
 
 ---

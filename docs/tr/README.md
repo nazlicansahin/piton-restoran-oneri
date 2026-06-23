@@ -5,7 +5,11 @@ Projeyi **kendi bilgisayarınızda** çalıştırmak isteyen geliştiriciler iç
 | | |
 |---|---|
 | **Proje genel bakış** | [Kök README](../../README.md) |
-| **Fonksiyon referansı** | [docs/tr/functions/](./functions/README.md) |
+| **Dosya yapısı** | [STRUCTURE.md](./STRUCTURE.md) |
+| **Kullanım ve teknik tercihler** | [USAGE.md](./USAGE.md) |
+| **Teslim beklentileri (PDF §4)** | [DELIVERY.md](./DELIVERY.md) |
+| **Açıklamalı görseller** | [screenshots/README.md](./screenshots/README.md) |
+| **Fonksiyon referansı** | [functions/](./functions/README.md) |
 | **English setup** | [docs/en/README.md](../en/README.md) |
 
 ---
