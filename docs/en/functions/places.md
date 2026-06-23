@@ -36,4 +36,12 @@ route so the browser never calls Overpass directly.
 - **File:** `hooks/useGeolocation.ts`
 - **Purpose:** React hook for the browser Geolocation API with permission states and an Eskişehir fallback.
 - **Returns:** `{ lat, lng, status, error, request, fallback }`
-- **Side effects:** Requests device location on mount
+- **Side effects:** Requests device location on mount (`enableHighAccuracy: false`)
+
+### `getCachedNearbyPlaces`
+
+- **File:** `lib/places-cache.ts`
+- **Purpose:** Cache Overpass responses for 5 minutes with coordinate/radius bucketing via `unstable_cache`.
+- **Inputs:** `lat`, `lng`, `radiusM`
+- **Returns:** `Place[]`
+- **Side effects:** Overpass network call on cache miss

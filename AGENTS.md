@@ -55,7 +55,7 @@ Domains: `auth`, `places`, `recommendation`, `favorites`, `groups`
 
 ## Function documentation
 
-When creating or changing functions, document them in `docs/functions/<domain>.md` per [docs/FUNCTION_DOCUMENTATION.md](docs/FUNCTION_DOCUMENTATION.md). Rule: `.cursor/rules/function-documentation.mdc`.
+When creating or changing functions, document them in `docs/en/functions/<domain>.md` and `docs/tr/functions/<domain>.md` per [docs/en/FUNCTION_DOCUMENTATION.md](docs/en/FUNCTION_DOCUMENTATION.md). Rule: `.cursor/rules/function-documentation.mdc`.
 
 ## Deliverables (assignment)
 

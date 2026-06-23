@@ -29,7 +29,7 @@ the client hooks and store that drive optimistic UI.
 ## API routes
 
 - `GET /api/favorites`, `PUT|DELETE /api/favorites/:placeId` — personal favorites (place snapshot upsert + favorite link).
-- `GET|PUT /api/me/preferences` — preference profile (distance, price, cuisines).
+- `GET|PUT /api/me/preferences` — preference profile (distance, cuisines).
 - `GET|POST /api/groups`, `GET /api/groups/:id` — group list/create (transactional owner membership) and detail with members.
 - `GET|POST /api/groups/:id/favorites`, `DELETE /api/groups/:id/favorites/:placeId` — shared group favorites (mutations require owner/admin).
 - `POST /api/groups/:id/invites` — email invite with token + 7-day expiry (owner/admin only).

@@ -1,21 +1,21 @@
 ---
-description: Document every new function in docs/functions with name, purpose, and how it works
+description: Document every new function in docs/en/functions and docs/tr/functions with name, purpose, and how it works
 globs: "{app,components,hooks,lib,store}/**/*.{ts,tsx}"
 alwaysApply: false
 ---
 
 # Function Documentation Rule
 
-When you **create or significantly change** a function, add or update its entry in `docs/functions/`.
+When you **create or significantly change** a function, add or update its entry in **`docs/en/functions/`** and **`docs/tr/functions/`** (keep both in sync).
 
 ## Required doc file
 
 - One markdown file per **module/domain**, not per function:
-  - `docs/functions/recommend.md`
-  - `docs/functions/api-favorites.md`
-  - `docs/functions/auth.md`
-- If no file exists for the domain, create it.
-- See [docs/FUNCTION_DOCUMENTATION.md](../FUNCTION_DOCUMENTATION.md) for the full duty and template.
+  - `docs/en/functions/recommend.md` + `docs/tr/functions/recommend.md`
+  - `docs/en/functions/favorites-groups.md` + `docs/tr/functions/favorites-groups.md`
+  - `docs/en/functions/auth.md` + `docs/tr/functions/auth.md`
+- If no file exists for the domain, create it in both languages.
+- See [docs/en/FUNCTION_DOCUMENTATION.md](../docs/en/FUNCTION_DOCUMENTATION.md) for the full duty and template.
 
 ## What to document
 
@@ -33,10 +33,10 @@ For each function, include:
 ### `functionName`
 
 - **File:** `lib/recommend.ts`
-- **Purpose:** Ranks nearby places by user preferences and favorite history.
+- **Purpose:** Ranks nearby places by user preferences.
 - **How it works:**
   1. Filters places outside `maxDistanceKm`
-  2. Computes weighted scores (distance, cuisine, price, history)
+  2. Computes weighted scores (distance, cuisine)
   3. Sorts descending; breaks ties by distance then name
 - **Inputs:** `RecommendationInput`
 - **Returns:** `RecommendationItem[]`
@@ -49,9 +49,9 @@ For each function, include:
 
 ## When to update
 
-- New exported function → add section
-- Signature or behavior change → update section
-- Function removed → remove section in same commit/PR
+- New exported function → add section (EN + TR)
+- Signature or behavior change → update section (EN + TR)
+- Function removed → remove section in same commit/PR (EN + TR)
 
 ## Do not document
 

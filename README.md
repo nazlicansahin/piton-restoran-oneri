@@ -7,6 +7,8 @@
 | **Canlı demo** | [piton-restoran-oneri.vercel.app](https://piton-restoran-oneri.vercel.app) |
 | **Kaynak kod** | [github.com/nazlicansahin/piton-restoran-oneri](https://github.com/nazlicansahin/piton-restoran-oneri) |
 | **Stack** | Next.js 14 · TypeScript · Firebase Auth · Neon Postgres · Leaflet · Overpass API |
+| **Yerel kurulum (TR)** | [docs/tr/README.md](docs/tr/README.md) |
+| **Local setup (EN)** | [docs/en/README.md](docs/en/README.md) |
 
 ---
 
@@ -26,6 +28,7 @@
 - [API özeti](#api-özeti)
 - [Performans ve önbellekleme](#performans-ve-önbellekleme)
 - [Teslimat checklist](#teslimat-checklist)
+- [Yerel kurulum — adım adım rehber](#yerel-kurulum--adım-adım-rehber)
 - [Lisans](#lisans)
 
 ---
@@ -34,15 +37,15 @@
 
 ### Ana sayfa — harita, arama, öneriler (açık tema)
 
-![Ana sayfa — açık tema](docs/screenshots/home-light.png)
+![Ana sayfa — açık tema](docs/tr/screenshots/home-light.png)
 
 ### Ana sayfa — koyu tema, İngilizce arayüz
 
-![Ana sayfa — koyu tema, İngilizce](docs/screenshots/home-dark-en.png)
+![Ana sayfa — koyu tema, İngilizce](docs/tr/screenshots/home-dark-en.png)
 
 ### Giriş ekranı
 
-![Giriş ekranı](docs/screenshots/login-dark-en.png)
+![Giriş ekranı](docs/tr/screenshots/login-dark-en.png)
 
 ---
 
@@ -142,7 +145,7 @@ flowchart TB
 4. **Senin İçin:** `rankPlaces` → en yüksek skorlu 10 mekan
 5. **Diğer Yakın:** öneri ID’leri hariç, mesafeye göre 10’ar sayfalı liste
 
-Detaylı fonksiyon dokümantasyonu: [`docs/functions/`](docs/functions/README.md).
+Detaylı fonksiyon dokümantasyonu: [`docs/tr/functions/`](docs/tr/functions/README.md) · [English](docs/en/functions/README.md).
 
 ---
 
@@ -255,6 +258,8 @@ npm run build
 npm start
 ```
 
+> **Detaylı adım adım rehber** (Firebase ekranları, `.env` alanları, sorun giderme, checklist): [docs/tr/README.md](docs/tr/README.md) · [English](docs/en/README.md)
+
 ---
 
 ## Docker ile çalıştırma
@@ -361,7 +366,11 @@ piton-restoran-oneri/
 │   ├── db.ts                    # Neon client
 │   └── i18n/                    # TR/EN sözlükler
 ├── db/migrations/               # SQL şema dosyaları
-├── docs/functions/              # Fonksiyon dokümantasyonu
+├── docs/
+│   ├── tr/README.md             # Yerel kurulum rehberi (TR)
+│   ├── tr/functions/            # Fonksiyon referansı (TR)
+│   ├── en/README.md             # Local setup guide (EN)
+│   └── en/functions/            # Function reference (EN)
 ├── .github/workflows/ci.yml     # CI pipeline
 ├── Dockerfile
 ├── docker-compose.yml
@@ -384,7 +393,7 @@ piton-restoran-oneri/
 | `/api/groups/[id]/invites` | POST | Evet | Grup daveti |
 | `/api/chat` | POST | Evet | AI restoran asistanı |
 
-Detay: [`docs/functions/`](docs/functions/README.md).
+Detay: [`docs/tr/functions/`](docs/tr/functions/README.md) · [English](docs/en/functions/README.md).
 
 ---
 
@@ -422,6 +431,77 @@ PITON değerlendirme süreci için beklenen teslimatlar:
 5. Favori ekleme → **Favoriler** sayfasında şehir grupları
 6. Koyu mod ve dil değiştirme
 7. *(Bonus)* AI sohbet veya grup favorisi
+
+---
+
+## Yerel kurulum — adım adım rehber
+
+Projeyi kendi bilgisayarınıza kurmak için ayrıntılı rehber:
+
+| Dil | Dosya |
+|-----|-------|
+| **Türkçe** | [docs/tr/README.md](docs/tr/README.md) |
+| **English** | [docs/en/README.md](docs/en/README.md) |
+
+Aşağıda özet akış yer alır; ekran görüntüleri, sorun giderme tablosu ve checklist için yukarıdaki dosyalara bakın.
+
+### Gerekli yazılımlar
+
+Git, **Node.js 20+**, npm ve migration için **psql**. Opsiyonel: Docker.
+
+```bash
+node --version   # v20.x olmalı
+npm --version
+psql --version   # migration için
+```
+
+### Gerekli hesaplar
+
+- **Firebase** — Google + e-posta/şifre girişi (ücretsiz)
+- **Neon** — Postgres (ücretsiz tier)
+- **OpenAI** — yalnızca AI sohbet istiyorsanız (opsiyonel)
+
+### Kurulum özeti (6 adım)
+
+```bash
+# 0) Repo
+git clone https://github.com/nazlicansahin/piton-restoran-oneri.git
+cd piton-restoran-oneri && npm install
+
+# 1) .env.local
+cp .env.example .env.local
+# → Firebase NEXT_PUBLIC_* + FIREBASE_ADMIN_*
+# → Neon DATABASE_URL (pooled) + DATABASE_URL_UNPOOLED (direct)
+
+# 2) Migration (direct URL ile)
+export DATABASE_URL_UNPOOLED="postgresql://..."
+npm run db:migrate
+psql "$DATABASE_URL_UNPOOLED" -f db/migrations/002_phase2.sql
+npm run db:migrate:city
+
+# 3) Çalıştır
+npm run dev
+# → http://localhost:3000
+```
+
+**Firebase:** Authentication’da Google + Email/Password açık; **Authorized domains**’e `localhost` ekleyin.  
+**Admin key:** `FIREBASE_ADMIN_PRIVATE_KEY` çift tırnak içinde, `\n` ile satır sonları.
+
+### Giriş gerektiren özellikler
+
+| Özellik | Giriş |
+|---------|-------|
+| Harita, yakın mekanlar, arama | Hayır |
+| Tercih kaydetme, favoriler, gruplar | Evet |
+| AI sohbet | Hayır* (*key gerekir) |
+
+### Doğrulama
+
+```bash
+npm run lint && npm test && npm run build
+```
+
+Tam adımlar, `.env` alan açıklamaları ve **sık karşılaşılan hatalar**: [docs/tr/README.md](docs/tr/README.md).
 
 ---
 
