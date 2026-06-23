@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { fetchNearbyPlaces } from "@/lib/overpass";
+import {
+  getCachedNearbyPlaces,
+  placesCacheControlHeader,
+} from "@/lib/places-cache";
 import type { ApiError } from "@/lib/types";
 
 const querySchema = z.object({
@@ -40,8 +43,15 @@ export async function GET(request: Request) {
   const { lat, lng, radius } = parsed.data;
 
   try {
-    const items = await fetchNearbyPlaces(lat, lng, radius);
-    return NextResponse.json({ items });
+    const items = await getCachedNearbyPlaces(lat, lng, radius);
+    return NextResponse.json(
+      { items },
+      {
+        headers: {
+          "Cache-Control": placesCacheControlHeader(),
+        },
+      },
+    );
   } catch (err) {
     const error: ApiError = {
       code: "upstream_error",

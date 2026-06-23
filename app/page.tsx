@@ -20,6 +20,7 @@ import { PreferenceForm } from "@/components/preferences/PreferenceForm";
 import { RestaurantChat } from "@/components/chat/RestaurantChat";
 import type { ChatContextPayload } from "@/lib/chat/types";
 import type { GeocodeResult } from "@/lib/geocode";
+import { cn } from "@/lib/utils";
 import { PlaceListSkeleton } from "@/components/skeletons/PlaceListSkeleton";
 import { MapSkeleton } from "@/components/skeletons/MapSkeleton";
 
@@ -55,6 +56,9 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [nearbyPage, setNearbyPage] = useState(1);
+  const [placesFetchRadiusKm, setPlacesFetchRadiusKm] = useState(
+    preferences.maxDistanceKm,
+  );
   const [searchCenter, setSearchCenter] = useState<{
     lat: number;
     lng: number;
@@ -71,13 +75,24 @@ export default function HomePage() {
   }, [geo.lat, geo.lng]);
 
   useEffect(() => {
-    if (searchCenter != null) return;
     if (userLocation) {
-      setSearchCenter(userLocation);
-    } else if (geo.status !== "loading" && geo.status !== "idle") {
-      setSearchCenter(geo.fallback);
+      setSearchCenter((prev) => {
+        if (prev == null || !coordsDiffer(prev, geo.fallback)) {
+          return userLocation;
+        }
+        return prev;
+      });
+      return;
     }
-  }, [userLocation, geo.status, geo.fallback, searchCenter]);
+    setSearchCenter((prev) => prev ?? geo.fallback);
+  }, [userLocation, geo.fallback]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setPlacesFetchRadiusKm(preferences.maxDistanceKm);
+    }, 450);
+    return () => window.clearTimeout(timer);
+  }, [preferences.maxDistanceKm]);
 
   const isCustomSearchCenter =
     userLocation != null &&
@@ -118,9 +133,13 @@ export default function HomePage() {
       setLoadingPlaces(true);
       setError(null);
       try {
-        const radiusM = Math.max(500, Math.round(preferences.maxDistanceKm * 1000));
+        const radiusM = Math.max(
+          500,
+          Math.round(placesFetchRadiusKm * 1000),
+        );
         const res = await fetch(
           `/api/places?lat=${searchCenter!.lat}&lng=${searchCenter!.lng}&radius=${radiusM}`,
+          { cache: "default" },
         );
         if (!res.ok) throw new Error(t("home.placesError"));
         const data = (await res.json()) as PlacesResponse;
@@ -135,7 +154,7 @@ export default function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [searchCenter, preferences.maxDistanceKm, t]);
+  }, [searchCenter, placesFetchRadiusKm, t]);
 
   const placesNearCenter = useMemo(() => {
     if (!searchCenter) return places;
@@ -235,15 +254,21 @@ export default function HomePage() {
     };
   }, [locale, searchCenter, preferences, favorites, sortedPlaces, recommendations]);
 
-  const showRecommendations = !loadingPlaces && filteredRecommendations.length > 0;
+  const hasStalePlaces = places.length > 0;
+  const showRecommendations =
+    filteredRecommendations.length > 0 &&
+    (!loadingPlaces || hasStalePlaces);
   const showNearbyPlaces =
-    !loadingPlaces && allNearbyPlacesExcludingBestPicks.length > 0;
-  const showPlacesSkeleton = loadingPlaces;
+    allNearbyPlacesExcludingBestPicks.length > 0 &&
+    (!loadingPlaces || hasStalePlaces);
+  const showPlacesSkeleton = loadingPlaces && !hasStalePlaces;
+  const isRefreshingPlaces = loadingPlaces && hasStalePlaces;
 
   const placesSubtitle = (() => {
     if (geo.status === "denied") return t("home.locationDenied");
     if (geo.status === "loading" && !searchCenter) return t("home.locating");
-    if (loadingPlaces && places.length === 0) return t("home.loadingPlaces");
+    if (loadingPlaces && !hasStalePlaces) return t("home.loadingPlaces");
+    if (isRefreshingPlaces) return t("home.refreshingPlaces");
     if (searchCenterLabel) {
       return t("home.placesNearLabel", {
         label: searchCenterLabel,
@@ -363,6 +388,7 @@ export default function HomePage() {
         {showRecommendations && (
           <section
             key={`${searchCenter?.lat.toFixed(4)}:${searchCenter?.lng.toFixed(4)}`}
+            className={cn(isRefreshingPlaces && "opacity-70 transition-opacity")}
           >
             <h2 className="mb-2 text-sm font-semibold">
               {t("home.recommendations")}
@@ -389,7 +415,9 @@ export default function HomePage() {
         )}
 
         {showNearbyPlaces && (
-          <section>
+          <section
+            className={cn(isRefreshingPlaces && "opacity-70 transition-opacity")}
+          >
             <h2 className="mb-2 text-sm font-semibold">{t("home.nearbyPlaces")}</h2>
             <ul className="flex flex-col gap-2">
               {nearbyPlacesOnPage.map((p) => (
