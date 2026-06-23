@@ -27,6 +27,14 @@ function normalize(value: string): string {
     .replace(/[\s-]+/g, "_");
 }
 
+/** Human-readable cuisine line for cards (OSM tags → readable list). */
+export function formatCuisineDisplay(cuisine: string | null): string {
+  if (!cuisine) return "";
+  return parsePlaceCuisines(cuisine)
+    .map((tag) => tag.replace(/_/g, " "))
+    .join(" · ");
+}
+
 /** OSM cuisine tags can be semicolon-separated; split into normalized tokens. */
 export function parsePlaceCuisines(cuisine: string | null): string[] {
   if (!cuisine) return [];

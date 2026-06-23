@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { expandSelectedCuisines, parsePlaceCuisines } from "./cuisine";
+import {
+  expandSelectedCuisines,
+  formatCuisineDisplay,
+  parsePlaceCuisines,
+} from "./cuisine";
 
 describe("parsePlaceCuisines", () => {
   it("splits semicolon/comma separated OSM tags into normalized tokens", () => {
@@ -13,6 +17,14 @@ describe("parsePlaceCuisines", () => {
   it("returns an empty array for missing cuisine", () => {
     expect(parsePlaceCuisines(null)).toEqual([]);
     expect(parsePlaceCuisines("")).toEqual([]);
+  });
+});
+
+describe("formatCuisineDisplay", () => {
+  it("joins tags with middle dots and replaces underscores", () => {
+    expect(formatCuisineDisplay("turkish;kuzu_şiş;ciğer")).toBe(
+      "turkish · kuzu şiş · ciğer",
+    );
   });
 });
 

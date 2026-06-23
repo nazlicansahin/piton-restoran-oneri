@@ -1,11 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { Heart, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useT } from "@/components/providers/I18nProvider";
+import { formatCuisineDisplay, parsePlaceCuisines } from "@/lib/cuisine";
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import type { Place, RecommendationItem } from "@/lib/types";
+
+/** Show expand control when OSM lists many cuisine tags. */
+const CUISINE_EXPAND_TAG_COUNT = 3;
 
 interface PlaceCardProps {
   place: Place;
@@ -25,6 +30,14 @@ export function PlaceCard({
   recommendation,
 }: PlaceCardProps) {
   const t = useT();
+  const [cuisineExpanded, setCuisineExpanded] = useState(false);
+
+  const cuisineTags = parsePlaceCuisines(place.cuisine);
+  const cuisineLabel = place.cuisine
+    ? formatCuisineDisplay(place.cuisine)
+    : t("place.noCuisine");
+  const canExpandCuisine = cuisineTags.length > CUISINE_EXPAND_TAG_COUNT;
+
   return (
     <Card
       className={cn(
@@ -34,18 +47,40 @@ export function PlaceCard({
       onClick={() => onSelect?.(place.id)}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate font-medium">
             {place.name ?? t("place.unnamed")}
           </p>
-          <p className="text-xs text-muted-foreground">
-            {place.cuisine ?? t("place.noCuisine")} · {place.distanceKm.toFixed(2)} km
-          </p>
+          <div className="mt-0.5 text-xs text-muted-foreground">
+            <p
+              className={cn(
+                "break-words",
+                !cuisineExpanded && canExpandCuisine && "line-clamp-1",
+              )}
+            >
+              {cuisineLabel}
+            </p>
+            {canExpandCuisine && (
+              <button
+                type="button"
+                className="mt-0.5 text-xs font-medium text-primary hover:underline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCuisineExpanded((open) => !open);
+                }}
+              >
+                {cuisineExpanded
+                  ? t("place.showLessCuisine")
+                  : t("place.showMoreCuisine")}
+              </button>
+            )}
+            <p className="mt-0.5">{place.distanceKm.toFixed(2)} km</p>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           {recommendation && (
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
-              {recommendation.totalScore}
+            <span className="whitespace-nowrap rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary sm:text-xs">
+              {t("place.matchScore", { score: recommendation.totalScore })}
             </span>
           )}
           <button
